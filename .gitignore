@@ -3,8 +3,11 @@
 .Rapp.history
 
 # Private Data
-/data-raw
+/data-raw/*
+!/data-raw/entry_picks.R
+/data
 /inst/slides
+
 
 # Session Data files
 .RData
