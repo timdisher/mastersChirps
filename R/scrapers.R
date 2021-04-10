@@ -1,1 +1,86 @@
 #' Pull masters leaderboard data
+#'
+fn_lb <- function(){
+  
+  
+  url <- "https://www.espn.com/golf/leaderboard"
+  webpage <- rvest::read_html(url) 
+  
+  table <- 
+    webpage %>% 
+    rvest::html_node("table") %>% # find tables (there's just the one)
+    rvest::html_table()  %>% # read as tibble
+    janitor::clean_names() %>% # make lower case snake_case names
+    dplyr::select(player, pos,tot, dplyr::starts_with("r")) %>% 
+    dplyr::filter(! grepl("cut", player)) %>%
+    dplyr::mutate(pos = stringr::str_remove(pos, "T")) %>%
+    dplyr::mutate_at(dplyr::vars(-c(player)), as.numeric)
+  
+
+  
+}
+
+#' Create daily ranks
+#' 
+#' @param table leaderboard  created by fn_lb
+fn_ranks <- function(table){
+  
+  
+  # Day 1:2
+  pre_cut <- 
+    table %>% dplyr::select(r1:r2) %>%
+    as.matrix() %>%
+    matrixStats::rowCumsums() %>%
+    `colnames<-`(paste0("r",1:2)) %>%
+    cbind(table %>% dplyr::select(-c(r1:r2))) %>%
+    tibble::as_tibble() %>%
+      ties(., var = r1) %>%
+      ties(., var = r2)
+    
+    
+  
+  # Day 3 on limited to those who made the cut
+  made_cut <-  pre_cut %>%
+    dplyr::filter(!is.na(pos))
+  
+  ranks_made <- made_cut %>%
+     dplyr::select(r3:r4) %>%
+     as.matrix() %>%
+     matrixStats::rowCumsums() %>% # na.rm by default
+     `colnames<-`(paste0("r",3:4)) %>%
+     cbind(made_cut %>% dplyr::select(-c(r3:r4))) %>%
+     tibble::as_tibble() %>%
+     ties(., var = r3) %>%
+     ties(., var = r4)
+    
+   ranks_cut <- pre_cut %>%
+     dplyr::filter(is.na(pos)) %>%
+    dplyr::mutate(r3_rank = r2_rank,
+                  r4_rank = r2_rank)
+
+   
+   rbind(ranks_made, ranks_cut)
+   }
+
+#' Identify ties
+#' 
+#' Identify ties and output a table with positions that would have been calculated
+#' on the day
+#' 
+#' @param dat a tibble
+#' @param var variable to create a rank variable for
+ties <- function(dat, var){
+  var <- rlang::enquo(var)
+  name <- paste0(rlang::as_name(var) , "_rank")
+  
+  if(dat %>% dplyr::pull(!! var) %>% is.na() %>% all){
+    return(dat %>% dplyr::mutate(!! name := NA))
+  }
+  
+  dat %>%
+    dplyr::arrange(!! var) %>%
+    dplyr::mutate(!! name := 1:dplyr::n()) %>%
+    dplyr::group_by(!! var) %>%
+    dplyr::mutate(!! name := min(!! rlang::sym(name))) %>%
+    dplyr::ungroup()
+}
