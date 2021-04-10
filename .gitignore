@@ -3,8 +3,8 @@
 .Rapp.history
 
 # Private Data
-/data-raw
-!entry_picks.R
+/data-raw/*
+!/data-raw/entry_picks.R
 /data
 /inst/slides
 
