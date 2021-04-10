@@ -84,3 +84,5 @@ ties <- function(dat, var){
     dplyr::mutate(!! name := min(!! rlang::sym(name))) %>%
     dplyr::ungroup()
 }
+
+#' Table scraper

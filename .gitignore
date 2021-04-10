@@ -4,7 +4,10 @@
 
 # Private Data
 /data-raw
+!entry_picks.R
+/data
 /inst/slides
+
 
 # Session Data files
 .RData
