@@ -2,6 +2,10 @@
 .Rhistory
 .Rapp.history
 
+# Private Data
+/data-raw
+/inst/slides
+
 # Session Data files
 .RData
 
