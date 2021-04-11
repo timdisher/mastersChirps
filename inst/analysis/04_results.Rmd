@@ -12,7 +12,7 @@ Ryan made a nice start on some basic line plots that we can build on
 from here.
 ```{r}
 golf_data <- tribble(
-  ~name, ~day, ~rank, ~icon,
+  ~name, ~day, ~pos, ~icon,
   "T", "1", 104, NA,
   "C", "1", 102, NA,
   "I", "1", 145, NA,
@@ -27,8 +27,9 @@ golf_data <- tribble(
 )
 
 ggplot(golf_data,
-       mapping = aes(x = day, y = rank,
+       mapping = aes(x = day, y = pos,
                                 group = name)) +
+  scale_y_reverse() +
   geom_line(aes(color = name)) +
   geom_point() +
   theme_minimal() +

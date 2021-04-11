@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Masters analysis Report</title>
-  <meta name="description" content="Masters analysis Report" />
+  <title>2 Player Choice Clustering | Masters analysis Report</title>
+  <meta name="description" content="2 Player Choice Clustering | Masters analysis Report" />
   <meta name="generator" content="bookdown 0.21.10 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Masters analysis Report" />
+  <meta property="og:title" content="2 Player Choice Clustering | Masters analysis Report" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Masters analysis Report" />
+  <meta name="twitter:title" content="2 Player Choice Clustering | Masters analysis Report" />
   
   
   
@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-<link rel="next" href="player-choice-clustering.html"/>
+<link rel="prev" href="index.html"/>
+<link rel="next" href="results-analysis.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
@@ -893,24 +893,43 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">Masters analysis Report</h1>
-<p class="author"><em>Tim Disher</em></p>
-<p class="date" style="margin-top: 1.5em;"><em>2021-04-11</em></p>
-</div>
-<div id="project-information" class="section level1">
-<h1><span class="header-section-number">1</span> Project Information</h1>
-<p>This project uses a Masters pool that me and some friends joined as a way to
-explore web/pdf scraping and some different ways of clustering covariates/outcomes.</p>
+<div id="player-choice-clustering" class="section level1">
+<h1><span class="header-section-number">2</span> Player Choice Clustering</h1>
+<div id="example" class="section level2">
+<h2><span class="header-section-number">2.1</span> Example</h2>
+<p>A brief set of example code was provided by Ryan based on <a href="https://www.datacamp.com/community/tutorials/pca-analysis-r">this tutorial</a>. The analysis is based on the mtcars dataset and provides a very bare bones
+showcase of the <code>prcomp</code> function and <code>ggbiplot</code>.</p>
+<p>First we create the PCA object using <code>prcomp</code> limited to continuous variables only.
+This was done because the other variables in mtcars are categorical/ordinal which
+do not work well with PCA without further processing.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="player-choice-clustering.html#cb1-1"></a>mtcars.pca &lt;-<span class="st"> </span><span class="kw">prcomp</span>(mtcars[,<span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">7</span>,<span class="dv">10</span>,<span class="dv">11</span>)], <span class="dt">center =</span> <span class="ot">TRUE</span>, <span class="dt">scale. =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb1-2"><a href="player-choice-clustering.html#cb1-2"></a></span>
+<span id="cb1-3"><a href="player-choice-clustering.html#cb1-3"></a><span class="kw">summary</span>(mtcars.pca)</span></code></pre></div>
+<pre><code>## Importance of components:
+##                           PC1    PC2     PC3     PC4     PC5     PC6     PC7    PC8     PC9
+## Standard deviation     2.3782 1.4429 0.71008 0.51481 0.42797 0.35184 0.32413 0.2419 0.14896
+## Proportion of Variance 0.6284 0.2313 0.05602 0.02945 0.02035 0.01375 0.01167 0.0065 0.00247
+## Cumulative Proportion  0.6284 0.8598 0.91581 0.94525 0.96560 0.97936 0.99103 0.9975 1.00000</code></pre>
+<p>We can them make a simple plot to show how different variables are related. The
+post goes into some extra details around drawing ellipses etc but we won’t get
+into that until the analysis phase if there is something interesting. One
+of the concepts that they showed that was pretty interesting though was how this
+type of plot can help you to identify variables that might be important for
+classification problems. For example all of the american cars cluster tightly
+in one section of the plot, suggesting they would be important in an “American vs
+not American” classification.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="player-choice-clustering.html#cb3-1"></a><span class="kw">ggbiplot</span>(mtcars.pca,<span class="dt">ellipse=</span><span class="ot">TRUE</span>,<span class="dt">choices=</span><span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">4</span>),   <span class="dt">labels=</span><span class="kw">rownames</span>(mtcars))</span></code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-2-1.svg" width="768" /></p>
 
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-<a href="player-choice-clustering.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="results-analysis.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

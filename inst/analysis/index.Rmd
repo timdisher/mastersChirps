@@ -21,6 +21,7 @@ knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE, dev="svg")
 library(xfun) # Flexible caching - flag to remove if everything runs quickly
 library(ggbiplot) # Used for PCA
 library(ggimage) # Add images to plots
+library(tibble)
 
 devtools::load_all(quiet = TRUE)
 ```

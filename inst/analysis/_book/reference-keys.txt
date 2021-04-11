@@ -1,3 +1,5 @@
 project-information
-pca-analysis
+player-choice-clustering
 example
+results-analysis
+examples-from-ryan
