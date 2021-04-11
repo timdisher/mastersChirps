@@ -5,7 +5,8 @@
 # Private Data
 /data-raw/*
 !/data-raw/entry_picks.R
-/data
+/data/*
+!/data/entry_picks_anon.rda
 /inst/slides
 
 
