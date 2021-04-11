@@ -1,0 +1,45 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+# Results Analysis
+
+
+## Examples from Ryan
+
+Ryan made a nice start on some basic line plots that we can build on
+from here.
+```{r}
+golf_data <- tribble(
+  ~name, ~day, ~rank, ~icon,
+  "T", "1", 104, NA,
+  "C", "1", 102, NA,
+  "I", "1", 145, NA,
+  "J", "1", 164, NA,
+  "R", "1", 170, NA,
+  # Day Two
+  "T", "2", 67, "/home/rbatten/learning-r/masterChirpsRBcalcs/masters-jacket.png",
+  "C", "2", 121, NA,
+  "I", "2", 200, NA,
+  "J", "2", 109, NA,
+  "R", "2", 117, NA
+)
+
+ggplot(golf_data,
+       mapping = aes(x = day, y = rank,
+                                group = name)) +
+  geom_line(aes(color = name)) +
+  geom_point() +
+  theme_minimal() +
+  ggtitle("Master's Pool Results") +
+  scale_color_manual(values = c("T" = "#006B54", "C" = "#DC4605",
+                                "I" = "#007298", "J" = "#ED8B00",
+                                "R" = "#002F6C")) +
+  geom_image(aes(image = icon), size = 0.05)
+
+```
+
+
+
+
