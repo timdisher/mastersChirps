@@ -1,0 +1,29 @@
+--- 
+title: Masters analysis Report
+author: "Tim Disher"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+output: 
+  bookdown::gitbook:
+    self_contained: false # true when sharing, false otherwise
+    split_by: chapter # non when sharing, chapter otherwise
+    css: "style.css"
+    includes:
+      in_header: ../code-fold.html # inspired by: https://stackoverflow.com/questions/45360998/code-folding-in-bookdown
+bibliography: ../chirps-lib.bib
+biblio-style: apalike
+link-citations: yes
+---
+
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE, dev="svg")
+library(xfun) # Flexible caching - flag to remove if everything runs quickly
+library(ggbiplot) # Used for PCA
+devtools::load_all(quiet = TRUE)
+```
+
+# Project Information
+
+This project uses a Masters pool that me and some friends joined as a way to 
+explore web/pdf scraping and some different ways of clustering covariates/outcomes.

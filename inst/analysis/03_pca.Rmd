@@ -1,0 +1,38 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+# PCA Analysis
+
+## Example
+
+A brief set of example code was provided by Ryan based on [this tutorial](https://www.datacamp.com/community/tutorials/pca-analysis-r
+). The analysis is based on the mtcars dataset and provides a very bare bones
+showcase of the `prcomp` function and `ggbiplot`.
+
+First we create the PCA object using `prcomp` limited to continuous variables only.
+This was done because the other variables in mtcars are categorical/ordinal which
+do not work well with PCA without further processing.
+
+```{r}
+mtcars.pca <- prcomp(mtcars[,c(1:7,10,11)], center = TRUE, scale. = TRUE)
+
+summary(mtcars.pca)
+
+```
+
+We can them make a simple plot to show how different variables are related. The
+post goes into some extra details around drawing ellipses etc but we won't get
+into that until the analysis phase if there is something interesting. One
+of the concepts that they showed that was pretty interesting though was how this
+type of plot can help you to identify variables that might be important for
+classification problems. For example all of the american cars cluster tightly
+in one section of the plot, suggesting they would be important in an "American vs
+not American" classification. 
+
+```{r fig.width= 8, fig.height= 8}
+ggbiplot(mtcars.pca,ellipse=TRUE,choices=c(3,4),   labels=rownames(mtcars))
+
+```
+
