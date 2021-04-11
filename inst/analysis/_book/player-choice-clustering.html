@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>2 Player Choice Clustering | Masters analysis Report</title>
-  <meta name="description" content="2 Player Choice Clustering | Masters analysis Report" />
+  <title>3 Player Choice Clustering | Masters analysis Report</title>
+  <meta name="description" content="3 Player Choice Clustering | Masters analysis Report" />
   <meta name="generator" content="bookdown 0.21.10 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="2 Player Choice Clustering | Masters analysis Report" />
+  <meta property="og:title" content="3 Player Choice Clustering | Masters analysis Report" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="2 Player Choice Clustering | Masters analysis Report" />
+  <meta name="twitter:title" content="3 Player Choice Clustering | Masters analysis Report" />
   
   
   
@@ -31,7 +31,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="index.html"/>
+<link rel="prev" href="import-and-clean-data.html"/>
 <link rel="next" href="results-analysis.html"/>
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -870,11 +870,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <ul class="summary">
 <li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Project Information</a></li>
-<li class="chapter" data-level="2" data-path="player-choice-clustering.html"><a href="player-choice-clustering.html"><i class="fa fa-check"></i><b>2</b> Player Choice Clustering</a><ul>
-<li class="chapter" data-level="2.1" data-path="player-choice-clustering.html"><a href="player-choice-clustering.html#example"><i class="fa fa-check"></i><b>2.1</b> Example</a></li>
+<li class="chapter" data-level="2" data-path="import-and-clean-data.html"><a href="import-and-clean-data.html"><i class="fa fa-check"></i><b>2</b> Import and Clean Data</a></li>
+<li class="chapter" data-level="3" data-path="player-choice-clustering.html"><a href="player-choice-clustering.html"><i class="fa fa-check"></i><b>3</b> Player Choice Clustering</a><ul>
+<li class="chapter" data-level="3.1" data-path="player-choice-clustering.html"><a href="player-choice-clustering.html#example"><i class="fa fa-check"></i><b>3.1</b> Example</a></li>
 </ul></li>
-<li class="chapter" data-level="3" data-path="results-analysis.html"><a href="results-analysis.html"><i class="fa fa-check"></i><b>3</b> Results Analysis</a><ul>
-<li class="chapter" data-level="3.1" data-path="results-analysis.html"><a href="results-analysis.html#examples-from-ryan"><i class="fa fa-check"></i><b>3.1</b> Examples from Ryan</a></li>
+<li class="chapter" data-level="4" data-path="results-analysis.html"><a href="results-analysis.html"><i class="fa fa-check"></i><b>4</b> Results Analysis</a><ul>
+<li class="chapter" data-level="4.1" data-path="results-analysis.html"><a href="results-analysis.html#examples-from-ryan"><i class="fa fa-check"></i><b>4.1</b> Examples from Ryan</a></li>
 </ul></li>
 </ul>
 
@@ -894,17 +895,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
             <section class="normal" id="section-">
 <div id="player-choice-clustering" class="section level1">
-<h1><span class="header-section-number">2</span> Player Choice Clustering</h1>
+<h1><span class="header-section-number">3</span> Player Choice Clustering</h1>
 <div id="example" class="section level2">
-<h2><span class="header-section-number">2.1</span> Example</h2>
+<h2><span class="header-section-number">3.1</span> Example</h2>
 <p>A brief set of example code was provided by Ryan based on <a href="https://www.datacamp.com/community/tutorials/pca-analysis-r">this tutorial</a>. The analysis is based on the mtcars dataset and provides a very bare bones
 showcase of the <code>prcomp</code> function and <code>ggbiplot</code>.</p>
 <p>First we create the PCA object using <code>prcomp</code> limited to continuous variables only.
 This was done because the other variables in mtcars are categorical/ordinal which
 do not work well with PCA without further processing.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="player-choice-clustering.html#cb1-1"></a>mtcars.pca &lt;-<span class="st"> </span><span class="kw">prcomp</span>(mtcars[,<span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">7</span>,<span class="dv">10</span>,<span class="dv">11</span>)], <span class="dt">center =</span> <span class="ot">TRUE</span>, <span class="dt">scale. =</span> <span class="ot">TRUE</span>)</span>
-<span id="cb1-2"><a href="player-choice-clustering.html#cb1-2"></a></span>
-<span id="cb1-3"><a href="player-choice-clustering.html#cb1-3"></a><span class="kw">summary</span>(mtcars.pca)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="player-choice-clustering.html#cb2-1"></a>mtcars.pca &lt;-<span class="st"> </span><span class="kw">prcomp</span>(mtcars[,<span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">7</span>,<span class="dv">10</span>,<span class="dv">11</span>)], <span class="dt">center =</span> <span class="ot">TRUE</span>, <span class="dt">scale. =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb2-2"><a href="player-choice-clustering.html#cb2-2"></a></span>
+<span id="cb2-3"><a href="player-choice-clustering.html#cb2-3"></a><span class="kw">summary</span>(mtcars.pca)</span></code></pre></div>
 <pre><code>## Importance of components:
 ##                           PC1    PC2     PC3     PC4     PC5     PC6     PC7    PC8     PC9
 ## Standard deviation     2.3782 1.4429 0.71008 0.51481 0.42797 0.35184 0.32413 0.2419 0.14896
@@ -918,8 +919,8 @@ type of plot can help you to identify variables that might be important for
 classification problems. For example all of the american cars cluster tightly
 in one section of the plot, suggesting they would be important in an “American vs
 not American” classification.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="player-choice-clustering.html#cb3-1"></a><span class="kw">ggbiplot</span>(mtcars.pca,<span class="dt">ellipse=</span><span class="ot">TRUE</span>,<span class="dt">choices=</span><span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">4</span>),   <span class="dt">labels=</span><span class="kw">rownames</span>(mtcars))</span></code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-2-1.svg" width="768" /></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="player-choice-clustering.html#cb4-1"></a><span class="kw">ggbiplot</span>(mtcars.pca,<span class="dt">ellipse=</span><span class="ot">TRUE</span>,<span class="dt">choices=</span><span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">4</span>),   <span class="dt">labels=</span><span class="kw">rownames</span>(mtcars))</span></code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-3-1.svg" width="768" /></p>
 
 </div>
 </div>
@@ -928,7 +929,7 @@ not American” classification.</p>
           </div>
         </div>
       </div>
-<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="import-and-clean-data.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 <a href="results-analysis.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>

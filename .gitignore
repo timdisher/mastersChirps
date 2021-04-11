@@ -9,8 +9,7 @@
 /data/*
 !/data/entry_picks_anon.rda
 !/data/leaderboard.rda
-/inst/slides
-
+/inst/slides/images_private
 
 # Session Data files
 .RData

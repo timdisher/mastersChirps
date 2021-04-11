@@ -1,0 +1,62 @@
+---
+title: "Masters Pool Analysis"
+subtitle: "Wow we are bad"  
+author: 
+  - "Tim Disher"
+date: '`r Sys.Date()`'
+output:
+  xaringan::moon_reader:
+    css: ["xaringan-themer.css", "style.css"]
+    seal: false
+    self_contained: false
+    nature:
+      slideNumberFormat: "%current%"
+      highlightStyle: github
+      highlightLines: true
+      ratio: 16:9
+      countIncrementalSlides: true
+      beforeInit: "macros.js"
+
+      
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(
+  fig.width=9, fig.height=3.5, fig.retina=3, fig.showtext = TRUE,
+  out.width = "100%",
+  cache = FALSE,
+  echo = TRUE,
+  message = FALSE, 
+  warning = FALSE,
+  fig.show = TRUE,
+  hiline = TRUE
+)
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+style_mono_light(
+  base_color = "#002F6C",
+  title_slide_text_color = "white",
+  link_color = "#ED8B00",
+  text_bold_color = "#ED8B00"
+)
+
+# class: title-slide, bottom, left
+# background-image: url(images/img-baby-in-nicu1.jpg)
+# background-size: cover
+# 
+# .pull-left[
+# ## 2021 ~~Masters~~ Amateurs Pool
+# 
+# Tim Disher, PhD, RN]
+```
+
+class: title-slide, bottom, center
+background-image: url(images/masters-logo.png)
+background-size: cover
+
+
+### 2021 Masters Pool EVERSANA Performance
+#### Room for Improvement

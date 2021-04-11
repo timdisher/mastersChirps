@@ -3,36 +3,133 @@ output: html_document
 editor_options: 
   chunk_output_type: console
 ---
-# Player Choice Clustering
+# Import and Clean Data
 
-## Example
+## Selection Data
 
-A brief set of example code was provided by Ryan based on [this tutorial](https://www.datacamp.com/community/tutorials/pca-analysis-r
-). The analysis is based on the mtcars dataset and provides a very bare bones
-showcase of the `prcomp` function and `ggbiplot`.
-
-First we create the PCA object using `prcomp` limited to continuous variables only.
-This was done because the other variables in mtcars are categorical/ordinal which
-do not work well with PCA without further processing.
+The original dataset was organized based on how the the pool was run with picks
+in columns. We will want to make this much wider by having each golfer as a
+column with a binary indicator of whether or not a given member of the pool
+selected them.  We create some variable tests at the same time.
 
 ```{r}
-mtcars.pca <- prcomp(mtcars[,c(1:7,10,11)], center = TRUE, scale. = TRUE)
+data("entry_picks_anon")
 
-summary(mtcars.pca)
+
+wide_dat <- entry_picks_anon %>%
+  pivot_longer(cols = -alt_name) %>%
+  mutate(name = value,
+         value = 1) %>%
+  pivot_wider(names_from = name, values_from= value) %>%
+  mutate_at(vars(-alt_name), ~ ifelse(is.na(.), 0, .)) 
+
+report <- data_validation_report()
+golfers <- entry_picks_anon %>% select(-alt_name) %>% unlist() %>% unique
+
+test_picks <- all(wide_dat %>% mutate(tot_pick = rowSums(across(`Jon Rahm`:`Robert MacIntyre`))) %>%
+  pull(tot_pick) == 8)
+
+validate(wide_dat, "Validate player selection data") %>%
+validate_if(all(test_picks),
+              description = "Verify everyone has 8 picks and nobody has any NA") %>%
+validate_cols(description = "Test all values are 0 or 1", in_set(0,1), -alt_name) %>%
+validate_if(description = "Test all 272 players are present", nrow(wide_dat) == 272) %>%
+  validate_if(description = "Test all golders are present", all(golfers %in% colnames(wide_dat))) %>%
+  add_results(report)
+
 
 ```
 
-We can them make a simple plot to show how different variables are related. The
-post goes into some extra details around drawing ellipses etc but we won't get
-into that until the analysis phase if there is something interesting. One
-of the concepts that they showed that was pretty interesting though was how this
-type of plot can help you to identify variables that might be important for
-classification problems. For example all of the american cars cluster tightly
-in one section of the plot, suggesting they would be important in an "American vs
-not American" classification. 
+## Leaderboard Data
 
-```{r fig.width= 8, fig.height= 8}
-ggbiplot(mtcars.pca,ellipse=TRUE,choices=c(3,4),   labels=rownames(mtcars))
+The leaderboard data has to be organized in order to allow for calculating the
+daily ranks of each player. This data is pulled directly from the [ESPN
+leaderboard]("https://www.espn.com/golf/leaderboard") using the `rvest` package. Code for html scraping can be found in
+`/data-raw/leaderboard.R`. 
+
+```{r}
+data("leaderboard")
+
+datatable(leaderboard,
+          colnames = c("Plaster", 
+                       "Position", 
+                       "Total Score", 
+                       paste("Day", 1:5)))
+
+```
+
+
+The rules for the pool were not entirely clear with
+respect to handling players that didn't make the second day cut, but it seemed
+to follow that they just kept their original ranking from the end of day 2. We
+use `rowCumsums` to get the cumulative score for each player and then call a
+quick custom ranking function to make sure ties are coded correctly. All golfers
+are included in the first day and then those in the group that made the day 2
+cut are then separated out after that. Players who don't make the cut still
+have their day 2 ranks carried forward.
+
+```{r}
+ 
+# Order of variables for later
+order <- quo(c(player:tot, r1:r4, r1_rank, r2_rank, r3_rank, r4_rank))
+  # Day 1:2
+  pre_cut <- 
+    leaderboard %>% dplyr::select(r1:r2) %>%
+    as.matrix() %>%
+    matrixStats::rowCumsums() %>% # Get cumulative score
+    `colnames<-`(paste0("r",1:2)) %>%
+    cbind(leaderboard %>% dplyr::select(-c(r1:r2))) %>%
+    tibble::as_tibble() %>%
+      ties(., var = r1) %>% # Score ties for day 1
+      ties(., var = r2) # Score ties for day 2
+    
+    
+  
+  # Day 3 on limited to those who made the cut. Start from full leaderboard
+  # to make sur eyou get the right cumulative scores
+  made_cut <-  leaderboard %>%
+    dplyr::filter(!is.na(pos))
+  
+  ranks_made <- made_cut %>%
+     dplyr::select(r1,r2,r3,r4) %>%
+     as.matrix() %>%
+     matrixStats::rowCumsums() %>% # na.rm by default
+     `colnames<-`(paste0("r",1:4)) %>%
+     cbind(made_cut %>% dplyr::select(-c(r1,r2,r3,r4))) %>%
+     tibble::as_tibble() %>%
+     ties(., var = r3) %>%
+     ties(., var = r4) %>%
+    left_join(pre_cut %>% select(player, ends_with("rank"))) %>%
+    select(!! order)
+    
+  
+   ranks_cut <- pre_cut %>%
+     dplyr::filter(is.na(pos)) %>%
+    dplyr::mutate(r3_rank = r2_rank,
+                  r4_rank = r2_rank) %>%
+     select(!! order)
+
+   
+score_dat <-  rbind(ranks_made, ranks_cut)
+
+# Add data tests
+validate(score_dat, "Validate leaderboard data") %>%
+validate_if(all(ranks_made$pos == ranks_made$r3_rank),
+              description = "Verify ranks calculated by hand against the current position. If TRUE, assumes the other days are correct as well.") %>%
+validate_if(description = "Test that highest score matches current score. Assume all the other days are correct if passes", in_set(0,1), all(ranks_made$r3 == ranks_made$tot)) %>%
+  add_results(report)
+
+```
+
+## Calculate Daily Scores for Pool Participants
+
+The final step of data prep is to combine the golfer daily scores with the
+player choices in order to calculate the score of each day of the tournament.
+This is calculated as the sum of the ranks of the players that each person
+chose. For example if your 8 players are in positions `r paste(1:8, collapse = ", ")` 
+then your score would be `r sum(1:8)`.
+
+```{r}
 
 ```
 
