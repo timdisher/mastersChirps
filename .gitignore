@@ -5,8 +5,10 @@
 # Private Data
 /data-raw/*
 !/data-raw/entry_picks.R
+!/data-raw/leaderboard.R
 /data/*
 !/data/entry_picks_anon.rda
+!/data/leaderboard.rda
 /inst/slides
 
 
