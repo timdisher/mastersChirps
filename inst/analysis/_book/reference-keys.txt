@@ -1,5 +1,8 @@
 project-information
 import-and-clean-data
+selection-data
+leaderboard-data
+calculate-daily-scores-for-pool-participants
 player-choice-clustering
 example
 results-analysis

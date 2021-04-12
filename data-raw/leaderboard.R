@@ -15,7 +15,7 @@ leaderboard <-
   dplyr::mutate_at(dplyr::vars(-c(player)), as.numeric)
 
 # Safety in case tables move or something
-if(Sys.Date() < "2021-04-12"){
+if(Sys.Date() < "2021-04-13"){
 
 usethis::use_data(leaderboard, overwrite = TRUE)
 }

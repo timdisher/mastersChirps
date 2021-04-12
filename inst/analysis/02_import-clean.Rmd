@@ -26,15 +26,22 @@ wide_dat <- entry_picks_anon %>%
 report <- data_validation_report()
 golfers <- entry_picks_anon %>% select(-alt_name) %>% unlist() %>% unique
 
-test_picks <- all(wide_dat %>% mutate(tot_pick = rowSums(across(`Jon Rahm`:`Robert MacIntyre`))) %>%
-  pull(tot_pick) == 8)
+test_picks <-
+  all(wide_dat %>% mutate(tot_pick = rowSums(across(
+    `Jon Rahm`:`Robert MacIntyre`
+  ))) %>%
+    pull(tot_pick) == 8)
 
 validate(wide_dat, "Validate player selection data") %>%
-validate_if(all(test_picks),
-              description = "Verify everyone has 8 picks and nobody has any NA") %>%
-validate_cols(description = "Test all values are 0 or 1", in_set(0,1), -alt_name) %>%
-validate_if(description = "Test all 272 players are present", nrow(wide_dat) == 272) %>%
-  validate_if(description = "Test all golders are present", all(golfers %in% colnames(wide_dat))) %>%
+  validate_if(description = "Verify everyone has 8 picks and nobody has any NA",
+              all(test_picks),
+              ) %>%
+  validate_cols(description = "Test all values are 0 or 1",
+                in_set(0, 1), -alt_name) %>%
+  validate_if(description = "Test all 272 players are present",
+              nrow(wide_dat) == 272) %>%
+  validate_if(description = "Test all golders are present",
+              all(golfers %in% colnames(wide_dat))) %>%
   add_results(report)
 
 
@@ -51,22 +58,24 @@ leaderboard]("https://www.espn.com/golf/leaderboard") using the `rvest` package.
 data("leaderboard")
 
 datatable(leaderboard,
-          colnames = c("Plaster", 
+          rownames = FALSE,
+          colnames = c("Player", 
                        "Position", 
                        "Total Score", 
-                       paste("Day", 1:5)))
+                       paste("Day", 1:4)))
 
 ```
 
 
-The rules for the pool were not entirely clear with
-respect to handling players that didn't make the second day cut, but it seemed
-to follow that they just kept their original ranking from the end of day 2. We
-use `rowCumsums` to get the cumulative score for each player and then call a
-quick custom ranking function to make sure ties are coded correctly. All golfers
-are included in the first day and then those in the group that made the day 2
-cut are then separated out after that. Players who don't make the cut still
-have their day 2 ranks carried forward.
+The rules for the pool were not entirely clear with respect to handling players
+that didn't make the second day cut, but it seemed to follow that they just kept
+their original ranking from the end of day 2. This is a little different from
+the official leaderboard, where DQs are dropped to the bottom. We use
+`rowCumsums` to get the cumulative score for each player and then call a quick
+custom ranking function to make sure ties are coded correctly. All golfers are
+included in the first day and then those in the group that made the day 2 cut
+are then separated out after that. Players who don't make the cut still have
+their day 2 ranks carried forward.
 
 ```{r}
  
@@ -114,9 +123,9 @@ score_dat <-  rbind(ranks_made, ranks_cut)
 
 # Add data tests
 validate(score_dat, "Validate leaderboard data") %>%
-validate_if(all(ranks_made$pos == ranks_made$r3_rank),
+validate_if(all(ranks_made$pos == ranks_made$r4_rank),
               description = "Verify ranks calculated by hand against the current position. If TRUE, assumes the other days are correct as well.") %>%
-validate_if(description = "Test that highest score matches current score. Assume all the other days are correct if passes", in_set(0,1), all(ranks_made$r3 == ranks_made$tot)) %>%
+validate_if(description = "Test that highest score matches current score. Assume all the other days are correct if passes",all(ranks_made$r4 == ranks_made$tot)) %>%
   add_results(report)
 
 ```
@@ -127,9 +136,71 @@ The final step of data prep is to combine the golfer daily scores with the
 player choices in order to calculate the score of each day of the tournament.
 This is calculated as the sum of the ranks of the players that each person
 chose. For example if your 8 players are in positions `r paste(1:8, collapse = ", ")` 
-then your score would be `r sum(1:8)`.
+then your score would be `r sum(1:8)`. A first step here however is to correct
+some differences in the names between the pool and the ESPN leaderboard. These
+are just some small spelling differences that are easier to change in leaderboard
+data than the other.
 
 ```{r}
 
+golfers[!golfers %in% score_dat$player]
+
+score_dat <- score_dat %>%
+  mutate(player = case_when(player == "Bryson DeChambeau" ~ "Bryson Dechambeau",
+                            player == "Charles Osborne (a)" ~ "Ollie Osborne",
+                            player == "Tyler Strafaci (a)" ~ "Tyler Strafaci",
+                            TRUE ~ player))
+```
+
+
+The final step in data prep is to calculate the daily scores for everyone in the
+pool. This is done by looping over rows in the pick data frame and and then
+for each user calculate the sum of their player ranks for each day by matching
+them to the score data. We test these against the ground-truth official scores
+for a few key users and add those results to the validation report. There are
+plenty of code inefficiencies here (row-wise operations are pretty slow) and
+a better approach would be to also scrape the final results and confirm they
+all match instead of just looking at this group. This will have to do for now
+though!
+
+```{r}
+pick_dat <- entry_picks_anon %>% select(-alt_name)
+
+final_scores <- apply(pick_dat, 1, function(x) {
+
+  # For each set of picks iterate over days
+  
+  map(paste0("r",1:4,"_rank"), ~ {
+    day <- .
+   rank_day <- score_dat %>% select(player, all_of(day))
+
+   sum(rank_day[match(x, rank_day$player), day])
+ 
+    
+  }) %>% do.call(cbind, .) %>% as_tibble %>% set_names(paste0("score_", 1:4))
+    
+}) %>% do.call(rbind, .)  %>% bind_cols(alt_name = entry_picks_anon$alt_name)
+
+ 
+test_names <- c("Eastin, John" = 309, #ES1
+                "Morlock, Geya" = 276, #ES2
+                "Williams, Cameron" = 242, #ES3
+                "Ross, Macie" = 252, #ES4
+                "el-Afzal, Haazima" = 279 #ES5
+                ) 
+
+validate(final_scores, description = "Validate score calculation algorithm") %>%
+  validate_if(description = "Validate final scores against official scores for ES staff", all(final_scores %>% filter(alt_name %in% all_of(names(test_names))) %>%
+  pull(score_4) == test_names)) %>%
+  add_results(report)
+
+
+ 
+```
+
+Finally we print the validation report
+
+```{r}
+print(report)
 ```
 

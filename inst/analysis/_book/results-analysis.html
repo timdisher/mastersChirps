@@ -24,7 +24,7 @@
 <meta name="author" content="Tim Disher" />
 
 
-<meta name="date" content="2021-04-11" />
+<meta name="date" content="2021-04-12" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -33,7 +33,7 @@
   
 <link rel="prev" href="player-choice-clustering.html"/>
 
-<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<script src="libs/jquery-3.5.1/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -53,6 +53,14 @@
 <script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script>
 <link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
 <script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+<script src="libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
+<link href="libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="libs/datatables-binding-0.17/datatables.js"></script>
+<link href="libs/dt-core-1.10.20/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="libs/dt-core-1.10.20/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="libs/dt-core-1.10.20/js/jquery.dataTables.min.js"></script>
+<link href="libs/crosstalk-1.1.1/css/crosstalk.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.1.1/js/crosstalk.min.js"></script>
 <script>
 /* ========================================================================
  * Bootstrap: transition.js v3.3.7
@@ -870,7 +878,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <ul class="summary">
 <li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Project Information</a></li>
-<li class="chapter" data-level="2" data-path="import-and-clean-data.html"><a href="import-and-clean-data.html"><i class="fa fa-check"></i><b>2</b> Import and Clean Data</a></li>
+<li class="chapter" data-level="2" data-path="import-and-clean-data.html"><a href="import-and-clean-data.html"><i class="fa fa-check"></i><b>2</b> Import and Clean Data</a><ul>
+<li class="chapter" data-level="2.1" data-path="import-and-clean-data.html"><a href="import-and-clean-data.html#selection-data"><i class="fa fa-check"></i><b>2.1</b> Selection Data</a></li>
+<li class="chapter" data-level="2.2" data-path="import-and-clean-data.html"><a href="import-and-clean-data.html#leaderboard-data"><i class="fa fa-check"></i><b>2.2</b> Leaderboard Data</a></li>
+<li class="chapter" data-level="2.3" data-path="import-and-clean-data.html"><a href="import-and-clean-data.html#calculate-daily-scores-for-pool-participants"><i class="fa fa-check"></i><b>2.3</b> Calculate Daily Scores for Pool Participants</a></li>
+</ul></li>
 <li class="chapter" data-level="3" data-path="player-choice-clustering.html"><a href="player-choice-clustering.html"><i class="fa fa-check"></i><b>3</b> Player Choice Clustering</a><ul>
 <li class="chapter" data-level="3.1" data-path="player-choice-clustering.html"><a href="player-choice-clustering.html#example"><i class="fa fa-check"></i><b>3.1</b> Example</a></li>
 </ul></li>
@@ -900,34 +912,34 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">4.1</span> Examples from Ryan</h2>
 <p>Ryan made a nice start on some basic line plots that we can build on
 from here.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="results-analysis.html#cb5-1"></a>golf_data &lt;-<span class="st"> </span><span class="kw">tribble</span>(</span>
-<span id="cb5-2"><a href="results-analysis.html#cb5-2"></a>  <span class="op">~</span>name, <span class="op">~</span>day, <span class="op">~</span>pos, <span class="op">~</span>icon,</span>
-<span id="cb5-3"><a href="results-analysis.html#cb5-3"></a>  <span class="st">&quot;T&quot;</span>, <span class="st">&quot;1&quot;</span>, <span class="dv">104</span>, <span class="ot">NA</span>,</span>
-<span id="cb5-4"><a href="results-analysis.html#cb5-4"></a>  <span class="st">&quot;C&quot;</span>, <span class="st">&quot;1&quot;</span>, <span class="dv">102</span>, <span class="ot">NA</span>,</span>
-<span id="cb5-5"><a href="results-analysis.html#cb5-5"></a>  <span class="st">&quot;I&quot;</span>, <span class="st">&quot;1&quot;</span>, <span class="dv">145</span>, <span class="ot">NA</span>,</span>
-<span id="cb5-6"><a href="results-analysis.html#cb5-6"></a>  <span class="st">&quot;J&quot;</span>, <span class="st">&quot;1&quot;</span>, <span class="dv">164</span>, <span class="ot">NA</span>,</span>
-<span id="cb5-7"><a href="results-analysis.html#cb5-7"></a>  <span class="st">&quot;R&quot;</span>, <span class="st">&quot;1&quot;</span>, <span class="dv">170</span>, <span class="ot">NA</span>,</span>
-<span id="cb5-8"><a href="results-analysis.html#cb5-8"></a>  <span class="co"># Day Two</span></span>
-<span id="cb5-9"><a href="results-analysis.html#cb5-9"></a>  <span class="st">&quot;T&quot;</span>, <span class="st">&quot;2&quot;</span>, <span class="dv">67</span>, <span class="st">&quot;/home/rbatten/learning-r/masterChirpsRBcalcs/masters-jacket.png&quot;</span>,</span>
-<span id="cb5-10"><a href="results-analysis.html#cb5-10"></a>  <span class="st">&quot;C&quot;</span>, <span class="st">&quot;2&quot;</span>, <span class="dv">121</span>, <span class="ot">NA</span>,</span>
-<span id="cb5-11"><a href="results-analysis.html#cb5-11"></a>  <span class="st">&quot;I&quot;</span>, <span class="st">&quot;2&quot;</span>, <span class="dv">200</span>, <span class="ot">NA</span>,</span>
-<span id="cb5-12"><a href="results-analysis.html#cb5-12"></a>  <span class="st">&quot;J&quot;</span>, <span class="st">&quot;2&quot;</span>, <span class="dv">109</span>, <span class="ot">NA</span>,</span>
-<span id="cb5-13"><a href="results-analysis.html#cb5-13"></a>  <span class="st">&quot;R&quot;</span>, <span class="st">&quot;2&quot;</span>, <span class="dv">117</span>, <span class="ot">NA</span></span>
-<span id="cb5-14"><a href="results-analysis.html#cb5-14"></a>)</span>
-<span id="cb5-15"><a href="results-analysis.html#cb5-15"></a></span>
-<span id="cb5-16"><a href="results-analysis.html#cb5-16"></a><span class="kw">ggplot</span>(golf_data,</span>
-<span id="cb5-17"><a href="results-analysis.html#cb5-17"></a>       <span class="dt">mapping =</span> <span class="kw">aes</span>(<span class="dt">x =</span> day, <span class="dt">y =</span> pos,</span>
-<span id="cb5-18"><a href="results-analysis.html#cb5-18"></a>                                <span class="dt">group =</span> name)) <span class="op">+</span></span>
-<span id="cb5-19"><a href="results-analysis.html#cb5-19"></a><span class="st">  </span><span class="kw">scale_y_reverse</span>() <span class="op">+</span></span>
-<span id="cb5-20"><a href="results-analysis.html#cb5-20"></a><span class="st">  </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">color =</span> name)) <span class="op">+</span></span>
-<span id="cb5-21"><a href="results-analysis.html#cb5-21"></a><span class="st">  </span><span class="kw">geom_point</span>() <span class="op">+</span></span>
-<span id="cb5-22"><a href="results-analysis.html#cb5-22"></a><span class="st">  </span><span class="kw">theme_minimal</span>() <span class="op">+</span></span>
-<span id="cb5-23"><a href="results-analysis.html#cb5-23"></a><span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">&quot;Master&#39;s Pool Results&quot;</span>) <span class="op">+</span></span>
-<span id="cb5-24"><a href="results-analysis.html#cb5-24"></a><span class="st">  </span><span class="kw">scale_color_manual</span>(<span class="dt">values =</span> <span class="kw">c</span>(<span class="st">&quot;T&quot;</span> =<span class="st"> &quot;#006B54&quot;</span>, <span class="st">&quot;C&quot;</span> =<span class="st"> &quot;#DC4605&quot;</span>,</span>
-<span id="cb5-25"><a href="results-analysis.html#cb5-25"></a>                                <span class="st">&quot;I&quot;</span> =<span class="st"> &quot;#007298&quot;</span>, <span class="st">&quot;J&quot;</span> =<span class="st"> &quot;#ED8B00&quot;</span>,</span>
-<span id="cb5-26"><a href="results-analysis.html#cb5-26"></a>                                <span class="st">&quot;R&quot;</span> =<span class="st"> &quot;#002F6C&quot;</span>)) <span class="op">+</span></span>
-<span id="cb5-27"><a href="results-analysis.html#cb5-27"></a><span class="st">  </span><span class="kw">geom_image</span>(<span class="kw">aes</span>(<span class="dt">image =</span> icon), <span class="dt">size =</span> <span class="fl">0.05</span>)</span></code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-4-1.svg" width="672" /></p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="results-analysis.html#cb13-1"></a>golf_data &lt;-<span class="st"> </span><span class="kw">tribble</span>(</span>
+<span id="cb13-2"><a href="results-analysis.html#cb13-2"></a>  <span class="op">~</span>name, <span class="op">~</span>day, <span class="op">~</span>pos, <span class="op">~</span>icon,</span>
+<span id="cb13-3"><a href="results-analysis.html#cb13-3"></a>  <span class="st">&quot;T&quot;</span>, <span class="st">&quot;1&quot;</span>, <span class="dv">104</span>, <span class="ot">NA</span>,</span>
+<span id="cb13-4"><a href="results-analysis.html#cb13-4"></a>  <span class="st">&quot;C&quot;</span>, <span class="st">&quot;1&quot;</span>, <span class="dv">102</span>, <span class="ot">NA</span>,</span>
+<span id="cb13-5"><a href="results-analysis.html#cb13-5"></a>  <span class="st">&quot;I&quot;</span>, <span class="st">&quot;1&quot;</span>, <span class="dv">145</span>, <span class="ot">NA</span>,</span>
+<span id="cb13-6"><a href="results-analysis.html#cb13-6"></a>  <span class="st">&quot;J&quot;</span>, <span class="st">&quot;1&quot;</span>, <span class="dv">164</span>, <span class="ot">NA</span>,</span>
+<span id="cb13-7"><a href="results-analysis.html#cb13-7"></a>  <span class="st">&quot;R&quot;</span>, <span class="st">&quot;1&quot;</span>, <span class="dv">170</span>, <span class="ot">NA</span>,</span>
+<span id="cb13-8"><a href="results-analysis.html#cb13-8"></a>  <span class="co"># Day Two</span></span>
+<span id="cb13-9"><a href="results-analysis.html#cb13-9"></a>  <span class="st">&quot;T&quot;</span>, <span class="st">&quot;2&quot;</span>, <span class="dv">67</span>, <span class="st">&quot;/home/rbatten/learning-r/masterChirpsRBcalcs/masters-jacket.png&quot;</span>,</span>
+<span id="cb13-10"><a href="results-analysis.html#cb13-10"></a>  <span class="st">&quot;C&quot;</span>, <span class="st">&quot;2&quot;</span>, <span class="dv">121</span>, <span class="ot">NA</span>,</span>
+<span id="cb13-11"><a href="results-analysis.html#cb13-11"></a>  <span class="st">&quot;I&quot;</span>, <span class="st">&quot;2&quot;</span>, <span class="dv">200</span>, <span class="ot">NA</span>,</span>
+<span id="cb13-12"><a href="results-analysis.html#cb13-12"></a>  <span class="st">&quot;J&quot;</span>, <span class="st">&quot;2&quot;</span>, <span class="dv">109</span>, <span class="ot">NA</span>,</span>
+<span id="cb13-13"><a href="results-analysis.html#cb13-13"></a>  <span class="st">&quot;R&quot;</span>, <span class="st">&quot;2&quot;</span>, <span class="dv">117</span>, <span class="ot">NA</span></span>
+<span id="cb13-14"><a href="results-analysis.html#cb13-14"></a>)</span>
+<span id="cb13-15"><a href="results-analysis.html#cb13-15"></a></span>
+<span id="cb13-16"><a href="results-analysis.html#cb13-16"></a><span class="kw">ggplot</span>(golf_data,</span>
+<span id="cb13-17"><a href="results-analysis.html#cb13-17"></a>       <span class="dt">mapping =</span> <span class="kw">aes</span>(<span class="dt">x =</span> day, <span class="dt">y =</span> pos,</span>
+<span id="cb13-18"><a href="results-analysis.html#cb13-18"></a>                                <span class="dt">group =</span> name)) <span class="op">+</span></span>
+<span id="cb13-19"><a href="results-analysis.html#cb13-19"></a><span class="st">  </span><span class="kw">scale_y_reverse</span>() <span class="op">+</span></span>
+<span id="cb13-20"><a href="results-analysis.html#cb13-20"></a><span class="st">  </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">color =</span> name)) <span class="op">+</span></span>
+<span id="cb13-21"><a href="results-analysis.html#cb13-21"></a><span class="st">  </span><span class="kw">geom_point</span>() <span class="op">+</span></span>
+<span id="cb13-22"><a href="results-analysis.html#cb13-22"></a><span class="st">  </span><span class="kw">theme_minimal</span>() <span class="op">+</span></span>
+<span id="cb13-23"><a href="results-analysis.html#cb13-23"></a><span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">&quot;Master&#39;s Pool Results&quot;</span>) <span class="op">+</span></span>
+<span id="cb13-24"><a href="results-analysis.html#cb13-24"></a><span class="st">  </span><span class="kw">scale_color_manual</span>(<span class="dt">values =</span> <span class="kw">c</span>(<span class="st">&quot;T&quot;</span> =<span class="st"> &quot;#006B54&quot;</span>, <span class="st">&quot;C&quot;</span> =<span class="st"> &quot;#DC4605&quot;</span>,</span>
+<span id="cb13-25"><a href="results-analysis.html#cb13-25"></a>                                <span class="st">&quot;I&quot;</span> =<span class="st"> &quot;#007298&quot;</span>, <span class="st">&quot;J&quot;</span> =<span class="st"> &quot;#ED8B00&quot;</span>,</span>
+<span id="cb13-26"><a href="results-analysis.html#cb13-26"></a>                                <span class="st">&quot;R&quot;</span> =<span class="st"> &quot;#002F6C&quot;</span>)) <span class="op">+</span></span>
+<span id="cb13-27"><a href="results-analysis.html#cb13-27"></a><span class="st">  </span><span class="kw">geom_image</span>(<span class="kw">aes</span>(<span class="dt">image =</span> icon), <span class="dt">size =</span> <span class="fl">0.05</span>)</span></code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-9-1.svg" width="672" /></p>
 
 </div>
 </div>
