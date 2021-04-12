@@ -1,0 +1,147 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Initial Data Exploration
+
+
+## Golfer Performance
+
+If we look at the leaderboard position of the full player field over time
+we end up with something that is a little overwhelming. We can several ties
+over time where ranks converge together and we can also see the cuts on day two 
+from the straight lines from that point onwards. One thing I am a little surprised by in the beginning is that once you get out of the best few players
+you actually get a lot of variability in ranks over days. This makes me regret
+not taking a little more time to watch because I can see already that daily
+scores in the pool would have had some potentially big swings.
+
+```{r}
+# Match style being used in the slides
+
+rank_names <- c(r1_rank = "Day 1",
+                r2_rank = "Day 2",
+                r3_rank = "Day 3",
+                r4_rank = "Day 4")
+
+# Add indicator for players that are cut
+score_dat <- score_dat %>%
+  mutate(cut = ifelse(is.na(pos), TRUE, FALSE))
+
+tx_def <-  function() {theme_xaringan(text_font_size = 10,
+                 title_font_size = 10)
+}
+
+
+score_pdat <- score_dat %>%
+  select(player, r1_rank:r4_rank, cut) %>%
+  pivot_longer(-c(player, cut)) %>%
+  mutate(name = factor(name, levels = names(rank_names), labels = rank_names)) %>%
+  left_join(group_dict)
+
+base_p <- score_pdat %>%
+  ggplot(aes(x = name, y = value, group = player)) +
+  labs(x = "Day of Tournament", y = "Leaderboard Position") +
+  scale_y_reverse() + 
+  geom_line() + 
+  tx_def()
+ 
+base_p + labs(title = "Leaderboard over time - All players")
+  
+
+```
+
+I don't really watch a lot of golf so coming in I was expecting players that
+were cut were generally would have had a bad tournament from the beginning.
+But we can see that while this is broadly true there were actually a few players
+who came out strong but had a bad day two. 
+
+```{r}
+base_p +
+  gghighlight(cut == TRUE)
+```
+
+We can look a little closer at the development of the top ten players over time.
+It looks like you get a mix of people who pretty much started and stayed there,
+and others who had a bad first day before finishing strong. 
+```{r}
+base_p + 
+  gghighlight(min(value) <= 10) + 
+  labs(title = "Leaderboard over time - Ever in Top 10")
+
+```
+
+Even looking at those who finished in the top 10 shows that there is a lot 
+of room to improve and even though you can have a big drop on the second day
+there is still time to recover. 
+```{r}
+base_p + 
+  gghighlight(last(value) <= 10) + 
+  labs(title = "Leaderboard over time - Finished in Top 10")
+
+```
+
+Lastly let's take a look at anyone who was ever in the top two. There were
+quite a few players tied for second on day three which must have made the last
+round exciting since they were all within striking distance of the leader. 
+
+```{r}
+base_p + 
+  gghighlight(min(value) <= 2, use_direct_label = FALSE) + 
+  labs(title = "Leaderboard over time - Ever in second place") 
+
+
+```
+
+Choices for the pool were made based on groups of selections, three from group
+A and B and two from group C. I assumed that these roughly translated to player
+ability but it doesn't seem like group was an overly strong predictor of
+performance. The cut includes players from all groups and the top performers in
+the tournament were mostly those from group B. Generally it looks like the top performers in the pool were those that made strong picks from these groups since their size relative to group A also meant they were harder to pick from. 
+
+Given the large amount of variability within groups I think my original idea
+of fitting an HLM to identify players who performed better than their group
+expectation would probably not be very interesting. The original idea there
+was to look at predictions with/without shrinkage from hierarchical grouping
+but I'm not convinced it will be worth the effort considering all groups have
+good spread over all day four positions.
+
+```{r fig.show="hold", out.width="50%", warning = FALSE}
+score_pdat %>%
+  ggplot(aes(x = name, y = value, group = player, colour = group)) +
+  labs(x = "Day of Tournament", y = "Leaderboard Position") +
+  scale_y_reverse() + 
+  scale_colour_discrete(name = "Group") +
+  geom_line() + 
+  tx_def()
+
+score_pdat %>%
+  filter(name == "Day 4") %>%
+  ggplot(aes(x = name, y = value, fill = group)) +
+  labs(x = "Day of Tournament", y = "Leaderboard Position") +
+  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75)) +
+  scale_fill_discrete(name = "Group") +
+  tx_def()
+```
+
+
+
+## Pool Performance
+
+### Player Choices
+
+```{r}
+entry_picks_anon
+```
+
+## Player Performance
+
+## Overall
+
+## Team Highlight
+
+```{r}
+final_scores
+
+```

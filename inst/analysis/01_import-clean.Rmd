@@ -198,6 +198,39 @@ validate(final_scores, description = "Validate score calculation algorithm") %>%
  
 ```
 
+Before printing the validation report let's add one last detail that might be
+interesting. We were provided picks within groups, which I (maybe naively) assumed was organized approximately by player ability. The first three picks 
+were from group A, the next three from group B, and the final two from group C.
+
+```{r}
+group_a <- pick_dat[,1:3] %>% unlist %>% unique
+group_b <- pick_dat[,4:6] %>% unlist %>% unique
+group_c <- pick_dat[,7:8] %>% unlist %>% unique
+
+group_dict <- tibble(group = c(rep("A", length(group_a)), 
+                               rep("B", length(group_b)), 
+                               rep("C", length(group_c))),
+       player = c(group_a, group_b, group_c))
+
+# Manually add 7 players from group C nobody chose
+man <- tibble(
+  group = "C",
+  player = c(
+    "Jim Herman",
+    "Robert Streb",
+    "Joe Long (a)",
+    "Hudson Swafford",
+    "Sandy Lyle",
+    "Fred Couples",
+    "Larry Mize"
+  )
+)
+
+group_dict <- rbind(group_dict, man)
+
+```
+
+
 Finally we print the validation report
 
 ```{r}

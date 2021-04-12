@@ -27,6 +27,18 @@ library(data.validator) # Create nice validation report
 library(assertr)
 library(sjlabelled) # Create variable labels
 library(DT)
+library(xaringanthemer) # For theming plots
+library(gghighlight) # Simple highlighting
+
+
+# Match style being used in slides
+style_mono_light(
+  base_color = "#002F6C",
+  title_slide_text_color = "white",
+  link_color = "#ED8B00",
+  text_bold_color = "#ED8B00",
+  white_color = "#FFFFFF"
+)
 
 devtools::load_all(quiet = TRUE)
 ```

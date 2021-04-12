@@ -3,7 +3,14 @@ import-and-clean-data
 selection-data
 leaderboard-data
 calculate-daily-scores-for-pool-participants
+initial-data-exploration
+golfer-performance
+pool-performance
+player-choices
+player-performance
+overall
+team-highlight
+results-analysis
 player-choice-clustering
 example
-results-analysis
 examples-from-ryan
