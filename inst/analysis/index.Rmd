@@ -17,7 +17,8 @@ link-citations: yes
 
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE, dev="svg")
+knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE, dev="svg",
+                      fig.showtext = TRUE)
 devtools::load_all()
 library(xfun) # Flexible caching - flag to remove if everything runs quickly
 library(tidyverse)
@@ -42,6 +43,7 @@ style_mono_light(
 plot_cols <- c("#002F6C", "#ED8B00", "#DC4405", "#007398", "#7FA9AE", "#B1B3B3", 
 "#565a5c")
 
+cache_dir <- here::here("inst","analysis","cache/")
 
 
 devtools::load_all(quiet = TRUE)

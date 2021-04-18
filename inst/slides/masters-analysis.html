@@ -4,7 +4,8 @@
     <title>Masters Pool Analysis</title>
     <meta charset="utf-8" />
     <meta name="author" content="Tim Disher" />
-    <meta name="date" content="2021-04-11" />
+    <meta name="date" content="2021-04-18" />
+    <link href="masters-analysis_files/remark-css/ninjutsu.css" rel="stylesheet" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
     <link rel="stylesheet" href="style.css" type="text/css" />
   </head>
@@ -23,6 +24,129 @@ background-size: cover
 
 ### 2021 Masters Pool EVERSANA Performance
 #### Room for Improvement
+
+---
+# Executive Summary
+.pull-left[
+&lt;img src="https://media.tenor.com/images/178ec783de0a8c61a6c37202cf6ff589/tenor.gif" width="500" /&gt;
+]
+
+.pull-right[
+####EVERSANA Final Leaderboard Position (out of 272) 
+![:scale 15%](images_private/tim-alt.png)Tim  -  **106**  
+![:scale 15%](images_private/jason.png)Jason  -  **121**  
+![:scale 15%](images_private/chris.png)Chris -  **159**  
+![:scale 15%](images_private/imran.png)Imran -  **163**  
+![:scale 15%](images_private/ryan.png)Ryan -  **220**  
+
+
+
+]
+
+---
+
+# Background
+
+.pull-left[
+#### The Tournament
+- The Masters is a golf tournament that takes place over four days. The winner gets
+a green jacket (pictured right)
+
+#### The Pool
+- A fundraiser for [three brothers](https://www.cbc.ca/news/canada/nova-scotia/sydney-project-honours-brother-1.5801362#:~:text=A%20Sydney%20family%20is%20turning,about%20their%20feelings%20and%20emotions.), a Sydney charity to raise awareness for men's mental health.
+- Each participant chose 8 golfers from three groups:
+  - Group A - 3 golfers (favourites)
+  - Group B - 3 golfers (mix)
+  - Group C - 2 golfers (mostly bad)  
+  
+  ]  
+
+.pull-right[
+&lt;div class="figure"&gt;
+&lt;img src="images/winner.jpg" alt="Pictured: This year's winner" width="400" /&gt;
+&lt;p class="caption"&gt;Pictured: This year's winner&lt;/p&gt;
+&lt;/div&gt;
+]
+
+---
+# Methods
+
+### Golfer Performance
+- Simple visual exploration
+
+### Pool Participant Performance
+
+#### Golfer Selection
+- Principal Components Analysis followed by k-means clustering to identify
+golfers commonly selected together
+
+#### Performance
+- Participant profiles generated based on longitudinal performance. 
+- Latent class analysis using growth mixture models
+
+---
+# Golfer Performance
+
+Maybe watching golf isn't that boring? Leaderboard is dynamic over four days
+
+&lt;img src="masters-analysis_files/figure-html/unnamed-chunk-3-1.svg" width="100%" /&gt;
+
+---
+# Golfer Choice - No Clear Favourites?
+- PCA - ehhh
+- Kmeans - kind of useless?
+
+---
+# Performance
+- Straight to GMM
+
+---
+class: split-four
+
+
+.column[
+.center[
+![:scale 60%](images_private/strong-prof.png)]
+### Strong Performers
+- Performed well on all four days
+- Chose players with better pre-masters PGA ranking
+- Not an employee of EVERSANA
+]  
+
+
+.column[.center[
+
+![:scale 60%](images_private/jason.png)
+### Improvers]
+- Start middle of the pack and improve or stay similar
+- Chose players with pre-masters ranking between strong and poor performers
+- Typical example: 
+  - **Jason (162 -&gt; 121)**
+  - **Tim (103 -&gt; 106)**
+]
+
+.column[.center[
+
+![:scale 60%](images_private/chris.png)
+### Decliners]
+- Start middle of the pack and decline over time
+- Chose players with similar or better PGA rankings than improvers
+- Typical example:
+  - **Chris (101 -&gt; 159)**
+  - **Ryan (166 -&gt; 220)**
+  - **Imran (146 -&gt; 163)**
+]  
+
+
+.column[
+
+.center[![:scale 60%](images_private/mikeweir.png)]
+### Poor Performers
+- Performed well on all four days
+- Chose players with better pre-masters PGA ranking
+- Typical example
+  - Chris
+]
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>

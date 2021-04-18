@@ -34,11 +34,16 @@ tx_def <-  function() {theme_xaringan(text_font_size = 10,
 }
 
 
-score_pdat <- score_dat %>%
+
+
+score_pdat <- xfun::cache_rds({
+ score_dat %>%
   select(player, r1_rank:r4_rank, cut) %>%
   pivot_longer(-c(player, cut)) %>%
   mutate(name = factor(name, levels = names(rank_names), labels = rank_names)) %>%
-  left_join(group_dict)
+  left_join(group_dict)  
+  
+}, file = "score_pdat.rds", dir = cache_dir)
 
 base_p <- score_pdat %>%
   ggplot(aes(x = name, y = value, group = player)) +
@@ -248,7 +253,7 @@ entry_picks_anon %>%
   ggplot(aes(x = alt_name, y = value, colour = winner)) +
   geom_point() +
   tx_def() +
-  scale_colour_es(name = "Top 5 vs EVERSANA", "primary") +
+  scale_colour_manual(name = "Top 5 vs EVERSANA", values = plot_cols[1:2]) +
   labs(title = "EVERSANA Player Selections", x = "", y = "") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
   
