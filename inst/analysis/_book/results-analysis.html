@@ -24,7 +24,7 @@
 <meta name="author" content="Tim Disher" />
 
 
-<meta name="date" content="2021-04-12" />
+<meta name="date" content="2021-04-18" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -888,15 +888,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="3.2" data-path="initial-data-exploration.html"><a href="initial-data-exploration.html#pool-performance"><i class="fa fa-check"></i><b>3.2</b> Pool Performance</a><ul>
 <li class="chapter" data-level="3.2.1" data-path="initial-data-exploration.html"><a href="initial-data-exploration.html#player-choices"><i class="fa fa-check"></i><b>3.2.1</b> Player Choices</a></li>
 </ul></li>
-<li class="chapter" data-level="3.3" data-path="initial-data-exploration.html"><a href="initial-data-exploration.html#player-performance"><i class="fa fa-check"></i><b>3.3</b> Player Performance</a></li>
-<li class="chapter" data-level="3.4" data-path="initial-data-exploration.html"><a href="initial-data-exploration.html#overall"><i class="fa fa-check"></i><b>3.4</b> Overall</a></li>
-<li class="chapter" data-level="3.5" data-path="initial-data-exploration.html"><a href="initial-data-exploration.html#team-highlight"><i class="fa fa-check"></i><b>3.5</b> Team Highlight</a></li>
+<li class="chapter" data-level="3.3" data-path="initial-data-exploration.html"><a href="initial-data-exploration.html#player-performance"><i class="fa fa-check"></i><b>3.3</b> Player Performance</a><ul>
+<li class="chapter" data-level="3.3.1" data-path="initial-data-exploration.html"><a href="initial-data-exploration.html#overall"><i class="fa fa-check"></i><b>3.3.1</b> Overall</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="4" data-path="results-analysis.html"><a href="results-analysis.html"><i class="fa fa-check"></i><b>4</b> Results Analysis</a><ul>
 <li class="chapter" data-level="4.1" data-path="results-analysis.html"><a href="results-analysis.html#player-choice-clustering"><i class="fa fa-check"></i><b>4.1</b> Player Choice Clustering</a><ul>
-<li class="chapter" data-level="4.1.1" data-path="results-analysis.html"><a href="results-analysis.html#example"><i class="fa fa-check"></i><b>4.1.1</b> Example</a></li>
+<li class="chapter" data-level="4.1.1" data-path="results-analysis.html"><a href="results-analysis.html#growth-mixture-model"><i class="fa fa-check"></i><b>4.1.1</b> Growth Mixture Model</a></li>
 </ul></li>
-<li class="chapter" data-level="4.2" data-path="results-analysis.html"><a href="results-analysis.html#examples-from-ryan"><i class="fa fa-check"></i><b>4.2</b> Examples from Ryan</a></li>
 </ul></li>
 </ul>
 
@@ -919,66 +918,180 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h1><span class="header-section-number">4</span> Results Analysis</h1>
 <div id="player-choice-clustering" class="section level2">
 <h2><span class="header-section-number">4.1</span> Player Choice Clustering</h2>
-<div id="example" class="section level3">
-<h3><span class="header-section-number">4.1.1</span> Example</h3>
-<p>A brief set of example code was provided by Ryan based on <a href="https://www.datacamp.com/community/tutorials/pca-analysis-r">this tutorial</a>. The analysis is based on the mtcars dataset and provides a very bare bones
-showcase of the <code>prcomp</code> function and <code>ggbiplot</code>.</p>
-<p>First we create the PCA object using <code>prcomp</code> limited to continuous variables only.
-This was done because the other variables in mtcars are categorical/ordinal which
-do not work well with PCA without further processing.</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="results-analysis.html#cb22-1"></a>mtcars.pca &lt;-<span class="st"> </span><span class="kw">prcomp</span>(mtcars[,<span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">7</span>,<span class="dv">10</span>,<span class="dv">11</span>)], <span class="dt">center =</span> <span class="ot">TRUE</span>, <span class="dt">scale. =</span> <span class="ot">TRUE</span>)</span>
-<span id="cb22-2"><a href="results-analysis.html#cb22-2"></a></span>
-<span id="cb22-3"><a href="results-analysis.html#cb22-3"></a><span class="kw">summary</span>(mtcars.pca)</span></code></pre></div>
+<p>First let’s see if there’s any interesting patterns in player choices.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="results-analysis.html#cb31-1"></a>golfer.pca &lt;-<span class="st"> </span><span class="kw">prcomp</span>(wide_dat[,<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb31-2"><a href="results-analysis.html#cb31-2"></a></span>
+<span id="cb31-3"><a href="results-analysis.html#cb31-3"></a><span class="kw">summary</span>(golfer.pca)</span></code></pre></div>
 <pre><code>## Importance of components:
-##                           PC1    PC2     PC3     PC4     PC5     PC6     PC7    PC8     PC9
-## Standard deviation     2.3782 1.4429 0.71008 0.51481 0.42797 0.35184 0.32413 0.2419 0.14896
-## Proportion of Variance 0.6284 0.2313 0.05602 0.02945 0.02035 0.01375 0.01167 0.0065 0.00247
-## Cumulative Proportion  0.6284 0.8598 0.91581 0.94525 0.96560 0.97936 0.99103 0.9975 1.00000</code></pre>
-<p>We can them make a simple plot to show how different variables are related. The
-post goes into some extra details around drawing ellipses etc but we won’t get
-into that until the analysis phase if there is something interesting. One
-of the concepts that they showed that was pretty interesting though was how this
-type of plot can help you to identify variables that might be important for
-classification problems. For example all of the american cars cluster tightly
-in one section of the plot, suggesting they would be important in an “American vs
-not American” classification.</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="results-analysis.html#cb24-1"></a><span class="kw">ggbiplot</span>(mtcars.pca,<span class="dt">ellipse=</span><span class="ot">TRUE</span>,<span class="dt">choices=</span><span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">4</span>),   <span class="dt">labels=</span><span class="kw">rownames</span>(mtcars))</span></code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-17-1.svg" width="768" /></p>
-</div>
-</div>
-<div id="examples-from-ryan" class="section level2">
-<h2><span class="header-section-number">4.2</span> Examples from Ryan</h2>
-<p>Ryan made a nice start on some basic line plots that we can build on
-from here.</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="results-analysis.html#cb25-1"></a>golf_data &lt;-<span class="st"> </span><span class="kw">tribble</span>(</span>
-<span id="cb25-2"><a href="results-analysis.html#cb25-2"></a>  <span class="op">~</span>name, <span class="op">~</span>day, <span class="op">~</span>pos, <span class="op">~</span>icon,</span>
-<span id="cb25-3"><a href="results-analysis.html#cb25-3"></a>  <span class="st">&quot;T&quot;</span>, <span class="st">&quot;1&quot;</span>, <span class="dv">104</span>, <span class="ot">NA</span>,</span>
-<span id="cb25-4"><a href="results-analysis.html#cb25-4"></a>  <span class="st">&quot;C&quot;</span>, <span class="st">&quot;1&quot;</span>, <span class="dv">102</span>, <span class="ot">NA</span>,</span>
-<span id="cb25-5"><a href="results-analysis.html#cb25-5"></a>  <span class="st">&quot;I&quot;</span>, <span class="st">&quot;1&quot;</span>, <span class="dv">145</span>, <span class="ot">NA</span>,</span>
-<span id="cb25-6"><a href="results-analysis.html#cb25-6"></a>  <span class="st">&quot;J&quot;</span>, <span class="st">&quot;1&quot;</span>, <span class="dv">164</span>, <span class="ot">NA</span>,</span>
-<span id="cb25-7"><a href="results-analysis.html#cb25-7"></a>  <span class="st">&quot;R&quot;</span>, <span class="st">&quot;1&quot;</span>, <span class="dv">170</span>, <span class="ot">NA</span>,</span>
-<span id="cb25-8"><a href="results-analysis.html#cb25-8"></a>  <span class="co"># Day Two</span></span>
-<span id="cb25-9"><a href="results-analysis.html#cb25-9"></a>  <span class="st">&quot;T&quot;</span>, <span class="st">&quot;2&quot;</span>, <span class="dv">67</span>, <span class="st">&quot;/home/rbatten/learning-r/masterChirpsRBcalcs/masters-jacket.png&quot;</span>,</span>
-<span id="cb25-10"><a href="results-analysis.html#cb25-10"></a>  <span class="st">&quot;C&quot;</span>, <span class="st">&quot;2&quot;</span>, <span class="dv">121</span>, <span class="ot">NA</span>,</span>
-<span id="cb25-11"><a href="results-analysis.html#cb25-11"></a>  <span class="st">&quot;I&quot;</span>, <span class="st">&quot;2&quot;</span>, <span class="dv">200</span>, <span class="ot">NA</span>,</span>
-<span id="cb25-12"><a href="results-analysis.html#cb25-12"></a>  <span class="st">&quot;J&quot;</span>, <span class="st">&quot;2&quot;</span>, <span class="dv">109</span>, <span class="ot">NA</span>,</span>
-<span id="cb25-13"><a href="results-analysis.html#cb25-13"></a>  <span class="st">&quot;R&quot;</span>, <span class="st">&quot;2&quot;</span>, <span class="dv">117</span>, <span class="ot">NA</span></span>
-<span id="cb25-14"><a href="results-analysis.html#cb25-14"></a>)</span>
-<span id="cb25-15"><a href="results-analysis.html#cb25-15"></a></span>
-<span id="cb25-16"><a href="results-analysis.html#cb25-16"></a><span class="kw">ggplot</span>(golf_data,</span>
-<span id="cb25-17"><a href="results-analysis.html#cb25-17"></a>       <span class="dt">mapping =</span> <span class="kw">aes</span>(<span class="dt">x =</span> day, <span class="dt">y =</span> pos,</span>
-<span id="cb25-18"><a href="results-analysis.html#cb25-18"></a>                                <span class="dt">group =</span> name)) <span class="op">+</span></span>
-<span id="cb25-19"><a href="results-analysis.html#cb25-19"></a><span class="st">  </span><span class="kw">scale_y_reverse</span>() <span class="op">+</span></span>
-<span id="cb25-20"><a href="results-analysis.html#cb25-20"></a><span class="st">  </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">color =</span> name)) <span class="op">+</span></span>
-<span id="cb25-21"><a href="results-analysis.html#cb25-21"></a><span class="st">  </span><span class="kw">geom_point</span>() <span class="op">+</span></span>
-<span id="cb25-22"><a href="results-analysis.html#cb25-22"></a><span class="st">  </span><span class="kw">theme_minimal</span>() <span class="op">+</span></span>
-<span id="cb25-23"><a href="results-analysis.html#cb25-23"></a><span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">&quot;Master&#39;s Pool Results&quot;</span>) <span class="op">+</span></span>
-<span id="cb25-24"><a href="results-analysis.html#cb25-24"></a><span class="st">  </span><span class="kw">scale_color_manual</span>(<span class="dt">values =</span> <span class="kw">c</span>(<span class="st">&quot;T&quot;</span> =<span class="st"> &quot;#006B54&quot;</span>, <span class="st">&quot;C&quot;</span> =<span class="st"> &quot;#DC4605&quot;</span>,</span>
-<span id="cb25-25"><a href="results-analysis.html#cb25-25"></a>                                <span class="st">&quot;I&quot;</span> =<span class="st"> &quot;#007298&quot;</span>, <span class="st">&quot;J&quot;</span> =<span class="st"> &quot;#ED8B00&quot;</span>,</span>
-<span id="cb25-26"><a href="results-analysis.html#cb25-26"></a>                                <span class="st">&quot;R&quot;</span> =<span class="st"> &quot;#002F6C&quot;</span>)) <span class="op">+</span></span>
-<span id="cb25-27"><a href="results-analysis.html#cb25-27"></a><span class="st">  </span><span class="kw">geom_image</span>(<span class="kw">aes</span>(<span class="dt">image =</span> icon), <span class="dt">size =</span> <span class="fl">0.05</span>)</span></code></pre></div>
-<p><img src="_main_files/figure-html/unnamed-chunk-18-1.svg" width="672" /></p>
+##                            PC1     PC2     PC3    PC4     PC5     PC6     PC7     PC8     PC9    PC10    PC11    PC12    PC13
+## Standard deviation     0.62297 0.59010 0.53747 0.5280 0.50823 0.50156 0.46683 0.45066 0.44262 0.43355 0.40197 0.39182 0.38125
+## Proportion of Variance 0.06528 0.05858 0.04859 0.0469 0.04345 0.04232 0.03666 0.03416 0.03296 0.03162 0.02718 0.02583 0.02445
+## Cumulative Proportion  0.06528 0.12386 0.17245 0.2193 0.26280 0.30512 0.34178 0.37594 0.40890 0.44051 0.46769 0.49352 0.51797
+##                           PC14    PC15    PC16   PC17    PC18    PC19    PC20    PC21    PC22    PC23    PC24    PC25    PC26
+## Standard deviation     0.37416 0.36402 0.35479 0.3491 0.34056 0.33048 0.32658 0.31780 0.30817 0.30574 0.29249 0.29141 0.28794
+## Proportion of Variance 0.02355 0.02229 0.02117 0.0205 0.01951 0.01837 0.01794 0.01699 0.01597 0.01572 0.01439 0.01428 0.01395
+## Cumulative Proportion  0.54152 0.56381 0.58498 0.6055 0.62499 0.64336 0.66131 0.67830 0.69427 0.70999 0.72439 0.73867 0.75262
+##                           PC27    PC28    PC29    PC30   PC31    PC32    PC33    PC34    PC35    PC36    PC37    PC38    PC39
+## Standard deviation     0.28300 0.27352 0.27208 0.26291 0.2558 0.25330 0.25135 0.24832 0.23910 0.23348 0.22027 0.21965 0.21697
+## Proportion of Variance 0.01347 0.01258 0.01245 0.01163 0.0110 0.01079 0.01063 0.01037 0.00962 0.00917 0.00816 0.00812 0.00792
+## Cumulative Proportion  0.76609 0.77867 0.79113 0.80275 0.8138 0.82455 0.83518 0.84555 0.85516 0.86433 0.87250 0.88061 0.88853
+##                           PC40    PC41   PC42    PC43    PC44    PC45    PC46    PC47    PC48    PC49    PC50    PC51   PC52
+## Standard deviation     0.20504 0.20456 0.1995 0.19582 0.19084 0.18701 0.18378 0.18289 0.18222 0.17804 0.17003 0.16669 0.1598
+## Proportion of Variance 0.00707 0.00704 0.0067 0.00645 0.00613 0.00588 0.00568 0.00563 0.00559 0.00533 0.00486 0.00467 0.0043
+## Cumulative Proportion  0.89560 0.90264 0.9093 0.91579 0.92191 0.92780 0.93348 0.93911 0.94469 0.95002 0.95489 0.95956 0.9639
+##                           PC53    PC54   PC55    PC56   PC57    PC58    PC59    PC60    PC61    PC62    PC63    PC64    PC65
+## Standard deviation     0.15848 0.13534 0.1244 0.12278 0.1193 0.11639 0.11340 0.10596 0.09852 0.09748 0.09228 0.08827 0.08432
+## Proportion of Variance 0.00422 0.00308 0.0026 0.00254 0.0024 0.00228 0.00216 0.00189 0.00163 0.00160 0.00143 0.00131 0.00120
+## Cumulative Proportion  0.96808 0.97116 0.9738 0.97630 0.9787 0.98098 0.98314 0.98503 0.98666 0.98826 0.98969 0.99100 0.99220
+##                           PC66    PC67    PC68    PC69    PC70    PC71    PC72    PC73    PC74    PC75    PC76    PC77    PC78
+## Standard deviation     0.08074 0.07811 0.07650 0.06998 0.05911 0.05795 0.05495 0.05444 0.05370 0.05088 0.04717 0.03898 0.03103
+## Proportion of Variance 0.00110 0.00103 0.00098 0.00082 0.00059 0.00056 0.00051 0.00050 0.00049 0.00044 0.00037 0.00026 0.00016
+## Cumulative Proportion  0.99329 0.99432 0.99530 0.99613 0.99672 0.99728 0.99779 0.99829 0.99877 0.99921 0.99958 0.99984 1.00000
+##                             PC79     PC80     PC81
+## Standard deviation     2.946e-16 1.87e-16 6.46e-17
+## Proportion of Variance 0.000e+00 0.00e+00 0.00e+00
+## Cumulative Proportion  1.000e+00 1.00e+00 1.00e+00</code></pre>
+<p>So unfortunately, as is usually the case, we don’t really see great performance
+until we hit the 30th principal component which means the plots for clustering
+aren’t all that informative. In an ideal world we’d see the nice situation where
+the first and second components explain a huge chunk of variance. Perhaps this
+shouldn’t be too Let’s just jump straight to kmeans on this and see if anything
+interesting comes up. Unfortunately the within sum of square approach is telling
+us we should have something like 40 clusters which is too much to be interesting.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="results-analysis.html#cb33-1"></a><span class="kw">fviz_nbclust</span>(golfer.pca<span class="op">$</span>x[,<span class="dv">1</span><span class="op">:</span><span class="dv">30</span>], kmeans, <span class="dt">method =</span> <span class="st">&quot;wss&quot;</span>,</span>
+<span id="cb33-2"><a href="results-analysis.html#cb33-2"></a>             <span class="dt">k.max =</span> <span class="dv">50</span>) <span class="op">+</span></span>
+<span id="cb33-3"><a href="results-analysis.html#cb33-3"></a><span class="st">  </span><span class="kw">tx_def</span>() <span class="op">+</span></span>
+<span id="cb33-4"><a href="results-analysis.html#cb33-4"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.text =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">5</span>))</span></code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-26-1.svg" width="672" /></p>
+<p>The silhouette approach chooses k based on an assessment of how similar is a point
+is to its own cluster compared to other clusters. This at least gives us a reasonable
+answer, but everything is pointing towards it not really providing much in terms
+of insights (particularly since it is only suggesting two clusters).</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="results-analysis.html#cb34-1"></a><span class="kw">fviz_nbclust</span>(golfer.pca<span class="op">$</span>x[,<span class="dv">1</span><span class="op">:</span><span class="dv">30</span>], kmeans, <span class="dt">method =</span> <span class="st">&quot;silhouette&quot;</span>) <span class="op">+</span></span>
+<span id="cb34-2"><a href="results-analysis.html#cb34-2"></a><span class="st">  </span><span class="kw">tx_def</span>()</span></code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-27-1.svg" width="672" /></p>
+<p>As expected, there isn’t really any interesting about these at all. Cluster one
+selected better performing golfers slightly more often than cluster two but otherwise
+this mostly looks like noise. When this is combined with the correlation plot and
+the finding that the winner didn’t necessarily make a special selection of players
+compared to overall averages this would also suggest there weren’t really groups
+of players who were selected together either. Did anyone really know what they
+were doing?</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="results-analysis.html#cb35-1"></a>golfer.km &lt;-<span class="st"> </span><span class="kw">kmeans</span>(golfer.pca<span class="op">$</span>x[,<span class="dv">1</span><span class="op">:</span><span class="dv">30</span>], <span class="dv">2</span>)</span>
+<span id="cb35-2"><a href="results-analysis.html#cb35-2"></a></span>
+<span id="cb35-3"><a href="results-analysis.html#cb35-3"></a>wide_dat<span class="op">$</span>cluster &lt;-<span class="st"> </span>golfer.km<span class="op">$</span>cluster</span>
+<span id="cb35-4"><a href="results-analysis.html#cb35-4"></a></span>
+<span id="cb35-5"><a href="results-analysis.html#cb35-5"></a></span>
+<span id="cb35-6"><a href="results-analysis.html#cb35-6"></a></span>
+<span id="cb35-7"><a href="results-analysis.html#cb35-7"></a>wide_dat <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="op">-</span>alt_name) <span class="op">%&gt;%</span></span>
+<span id="cb35-8"><a href="results-analysis.html#cb35-8"></a><span class="st">  </span><span class="kw">gather</span>(key, val, <span class="op">-</span><span class="st"> </span>cluster) <span class="op">%&gt;%</span></span>
+<span id="cb35-9"><a href="results-analysis.html#cb35-9"></a><span class="st">  </span><span class="kw">filter</span>(val <span class="op">==</span><span class="st"> </span><span class="dv">1</span>) <span class="op">%&gt;%</span></span>
+<span id="cb35-10"><a href="results-analysis.html#cb35-10"></a><span class="st">  </span><span class="kw">group_by</span>(cluster,key) <span class="op">%&gt;%</span></span>
+<span id="cb35-11"><a href="results-analysis.html#cb35-11"></a><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">count =</span> <span class="kw">n</span>()) <span class="op">%&gt;%</span></span>
+<span id="cb35-12"><a href="results-analysis.html#cb35-12"></a><span class="st">  </span><span class="kw">group_by</span>(cluster) <span class="op">%&gt;%</span></span>
+<span id="cb35-13"><a href="results-analysis.html#cb35-13"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">perc =</span> (count <span class="op">/</span><span class="st"> </span><span class="kw">sum</span>(count) <span class="op">*</span><span class="st"> </span><span class="dv">100</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb35-14"><a href="results-analysis.html#cb35-14"></a><span class="st">  </span><span class="kw">left_join</span>(score_dat <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(player, r4_rank), <span class="dt">by =</span> <span class="kw">c</span>(<span class="st">&quot;key&quot;</span> =<span class="st"> &quot;player&quot;</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb35-15"><a href="results-analysis.html#cb35-15"></a><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span></span>
+<span id="cb35-16"><a href="results-analysis.html#cb35-16"></a><span class="st">  </span><span class="kw">arrange</span>(r4_rank) <span class="op">%&gt;%</span></span>
+<span id="cb35-17"><a href="results-analysis.html#cb35-17"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">key =</span> forcats<span class="op">::</span><span class="kw">as_factor</span>(key)) <span class="op">%&gt;%</span></span>
+<span id="cb35-18"><a href="results-analysis.html#cb35-18"></a><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> key, <span class="dt">y =</span> perc)) <span class="op">+</span></span>
+<span id="cb35-19"><a href="results-analysis.html#cb35-19"></a><span class="st">  </span><span class="kw">geom_col</span>(<span class="dt">stat =</span> <span class="st">&quot;identity&quot;</span>) <span class="op">+</span></span>
+<span id="cb35-20"><a href="results-analysis.html#cb35-20"></a><span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span><span class="st"> </span>cluster) <span class="op">+</span></span>
+<span id="cb35-21"><a href="results-analysis.html#cb35-21"></a><span class="st">  </span><span class="kw">tx_def</span>() <span class="op">+</span></span>
+<span id="cb35-22"><a href="results-analysis.html#cb35-22"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">3</span>, <span class="dt">angle =</span> <span class="dv">90</span>, <span class="dt">vjust =</span> <span class="fl">0.5</span>))</span></code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-28-1.svg" width="672" /></p>
+<p>Group one had slightly lower scores and slightly higher SD on average.</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="results-analysis.html#cb36-1"></a>final_scores <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">left_join</span>(wide_dat <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(alt_name, cluster)) <span class="op">%&gt;%</span></span>
+<span id="cb36-2"><a href="results-analysis.html#cb36-2"></a><span class="st">  </span><span class="kw">group_by</span>(cluster) <span class="op">%&gt;%</span></span>
+<span id="cb36-3"><a href="results-analysis.html#cb36-3"></a><span class="st">  </span><span class="kw">summarize</span>(<span class="dt">m =</span> <span class="kw">mean</span>(score_<span class="dv">4</span>),</span>
+<span id="cb36-4"><a href="results-analysis.html#cb36-4"></a>            <span class="dt">sd =</span> <span class="kw">sd</span>(score_<span class="dv">4</span>))</span></code></pre></div>
+<pre><code>## # A tibble: 2 x 3
+##   cluster     m    sd
+##     &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1       1  277.  65.8
+## 2       2  248.  54.1</code></pre>
+<p>Perhaps a simpler way to look at this is just to count the number of times any
+player is selected in the top 10, top 20, top 30, etc.</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="results-analysis.html#cb38-1"></a>by_ten &lt;-<span class="st"> </span>wide_dat <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="op">-</span>cluster) <span class="op">%&gt;%</span></span>
+<span id="cb38-2"><a href="results-analysis.html#cb38-2"></a><span class="st">  </span><span class="kw">gather</span>(key, val, <span class="op">-</span>alt_name) <span class="op">%&gt;%</span></span>
+<span id="cb38-3"><a href="results-analysis.html#cb38-3"></a><span class="st">  </span><span class="kw">left_join</span>(final_scores <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(alt_name, score_<span class="dv">4</span>) <span class="op">%&gt;%</span></span>
+<span id="cb38-4"><a href="results-analysis.html#cb38-4"></a><span class="st">              </span><span class="kw">arrange</span>(score_<span class="dv">4</span>) <span class="op">%&gt;%</span></span>
+<span id="cb38-5"><a href="results-analysis.html#cb38-5"></a><span class="st">              </span><span class="kw">mutate</span>(<span class="dt">rank =</span> <span class="dv">1</span><span class="op">:</span><span class="kw">n</span>()) <span class="op">%&gt;%</span></span>
+<span id="cb38-6"><a href="results-analysis.html#cb38-6"></a><span class="st">              </span><span class="kw">group_by</span>(score_<span class="dv">4</span>) <span class="op">%&gt;%</span></span>
+<span id="cb38-7"><a href="results-analysis.html#cb38-7"></a><span class="st">              </span><span class="kw">mutate</span>(<span class="dt">rank =</span> <span class="kw">min</span>(rank))) <span class="op">%&gt;%</span></span>
+<span id="cb38-8"><a href="results-analysis.html#cb38-8"></a><span class="st">  </span><span class="kw">filter</span>(val <span class="op">==</span><span class="st"> </span><span class="dv">1</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb38-9"><a href="results-analysis.html#cb38-9"></a><span class="st">  </span><span class="kw">arrange</span>(score_<span class="dv">4</span>) <span class="op">%&gt;%</span></span>
+<span id="cb38-10"><a href="results-analysis.html#cb38-10"></a><span class="st">  </span><span class="kw">group_by</span>(alt_name) <span class="op">%&gt;%</span></span>
+<span id="cb38-11"><a href="results-analysis.html#cb38-11"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">group =</span> <span class="kw">case_when</span>(rank <span class="op">&lt;=</span><span class="st"> </span><span class="dv">10</span> <span class="op">~</span><span class="st"> &quot;Top 10&quot;</span>,</span>
+<span id="cb38-12"><a href="results-analysis.html#cb38-12"></a>                           rank <span class="op">&lt;=</span><span class="st"> </span><span class="dv">20</span> <span class="op">~</span><span class="st"> &quot;11-20&quot;</span>,</span>
+<span id="cb38-13"><a href="results-analysis.html#cb38-13"></a>                           rank <span class="op">&lt;=</span><span class="st"> </span><span class="dv">30</span> <span class="op">~</span><span class="st"> &quot;21-30&quot;</span>,</span>
+<span id="cb38-14"><a href="results-analysis.html#cb38-14"></a>                           rank <span class="op">&lt;=</span><span class="st"> </span><span class="dv">40</span> <span class="op">~</span><span class="st"> &quot;31-40&quot;</span>,</span>
+<span id="cb38-15"><a href="results-analysis.html#cb38-15"></a>                           rank <span class="op">&lt;=</span><span class="st"> </span><span class="dv">50</span> <span class="op">~</span><span class="st"> &quot;41-50&quot;</span>,</span>
+<span id="cb38-16"><a href="results-analysis.html#cb38-16"></a>                           <span class="ot">TRUE</span> <span class="op">~</span><span class="st"> &quot;&gt;50&quot;</span>))</span>
+<span id="cb38-17"><a href="results-analysis.html#cb38-17"></a>  </span>
+<span id="cb38-18"><a href="results-analysis.html#cb38-18"></a>by_ten <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(group) <span class="op">%&gt;%</span></span>
+<span id="cb38-19"><a href="results-analysis.html#cb38-19"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">num_g =</span> <span class="kw">length</span>(<span class="kw">unique</span>(alt_name))) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb38-20"><a href="results-analysis.html#cb38-20"></a><span class="st">  </span><span class="kw">group_by</span>(group,key) <span class="op">%&gt;%</span></span>
+<span id="cb38-21"><a href="results-analysis.html#cb38-21"></a><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">count =</span> <span class="kw">n</span>(), <span class="dt">num_g =</span> <span class="kw">unique</span>(num_g)) <span class="op">%&gt;%</span></span>
+<span id="cb38-22"><a href="results-analysis.html#cb38-22"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">perc =</span> (count <span class="op">/</span><span class="st"> </span>num_g)<span class="op">*</span><span class="dv">100</span>) <span class="op">%&gt;%</span></span>
+<span id="cb38-23"><a href="results-analysis.html#cb38-23"></a><span class="st">  </span><span class="kw">left_join</span>(score_dat <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(player, r4_rank), <span class="dt">by =</span> <span class="kw">c</span>(<span class="st">&quot;key&quot;</span> =<span class="st"> &quot;player&quot;</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb38-24"><a href="results-analysis.html#cb38-24"></a><span class="st">  </span><span class="kw">arrange</span>(r4_rank) <span class="op">%&gt;%</span></span>
+<span id="cb38-25"><a href="results-analysis.html#cb38-25"></a><span class="st">  </span><span class="kw">left_join</span>(group_dict <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">rename</span>(<span class="dt">selected =</span> group, <span class="dt">key =</span> player)) <span class="op">%&gt;%</span></span>
+<span id="cb38-26"><a href="results-analysis.html#cb38-26"></a><span class="st">  </span></span>
+<span id="cb38-27"><a href="results-analysis.html#cb38-27"></a><span class="st">  </span><span class="kw">mutate</span>( </span>
+<span id="cb38-28"><a href="results-analysis.html#cb38-28"></a>    <span class="dt">key =</span> glue<span class="op">::</span><span class="kw">glue</span>(<span class="st">&quot;{key} ({r4_rank})&quot;</span>),</span>
+<span id="cb38-29"><a href="results-analysis.html#cb38-29"></a>    <span class="dt">key =</span> forcats<span class="op">::</span><span class="kw">as_factor</span>(key)) <span class="op">%&gt;%</span></span>
+<span id="cb38-30"><a href="results-analysis.html#cb38-30"></a><span class="st">    </span><span class="kw">filter</span>(group <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Top 10&quot;</span>, <span class="st">&quot;11-20&quot;</span>, <span class="st">&quot;21-30&quot;</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb38-31"><a href="results-analysis.html#cb38-31"></a><span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> key, <span class="dt">y =</span> perc, <span class="dt">colour =</span> group)) <span class="op">+</span></span>
+<span id="cb38-32"><a href="results-analysis.html#cb38-32"></a><span class="st">  </span><span class="kw">geom_point</span>() <span class="op">+</span></span>
+<span id="cb38-33"><a href="results-analysis.html#cb38-33"></a><span class="st">  </span><span class="kw">coord_flip</span>() <span class="op">+</span></span>
+<span id="cb38-34"><a href="results-analysis.html#cb38-34"></a><span class="st">  </span><span class="kw">facet_grid</span>( selected <span class="op">~</span><span class="st"> </span>group, <span class="dt">scales =</span> <span class="st">&quot;free&quot;</span>, <span class="dt">space =</span> <span class="st">&quot;free&quot;</span>)</span></code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-30-1.svg" width="672" /></p>
+<div id="growth-mixture-model" class="section level3">
+<h3><span class="header-section-number">4.1.1</span> Growth Mixture Model</h3>
+<p>Another way we could look at this would be to leverage what seemed like potentially
+more promising data in terms of patterns of results, and maybe there are smaller
+groups of players that are shared in those? We can accomplish this analysis using
+a growth mixture model, which creates groups of players with similar trajectories.
+If we were doing this for a real project</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="results-analysis.html#cb39-1"></a>gmm_dat &lt;-<span class="st"> </span>final_scores <span class="op">%&gt;%</span></span>
+<span id="cb39-2"><a href="results-analysis.html#cb39-2"></a><span class="st">  </span><span class="kw">gather</span>(<span class="st">&quot;key&quot;</span>, <span class="st">&quot;value&quot;</span>, <span class="op">-</span><span class="kw">c</span>(alt_name)) <span class="op">%&gt;%</span></span>
+<span id="cb39-3"><a href="results-analysis.html#cb39-3"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">key =</span> <span class="kw">factor</span>(key, <span class="dt">labels =</span> <span class="kw">c</span>(<span class="st">&quot;Day 1&quot;</span>, <span class="st">&quot;Day 2&quot;</span>, <span class="st">&quot;Day 3&quot;</span>, <span class="st">&quot;Day 4&quot;</span>))) <span class="op">%&gt;%</span></span>
+<span id="cb39-4"><a href="results-analysis.html#cb39-4"></a><span class="st">  </span><span class="kw">group_by</span>(key) <span class="op">%&gt;%</span></span>
+<span id="cb39-5"><a href="results-analysis.html#cb39-5"></a><span class="st">  </span><span class="kw">arrange</span>(key, value) <span class="op">%&gt;%</span></span>
+<span id="cb39-6"><a href="results-analysis.html#cb39-6"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">pos =</span> <span class="dv">1</span><span class="op">:</span><span class="kw">n</span>()) <span class="op">%&gt;%</span></span>
+<span id="cb39-7"><a href="results-analysis.html#cb39-7"></a><span class="st">  </span><span class="kw">group_by</span>(key, value) <span class="op">%&gt;%</span></span>
+<span id="cb39-8"><a href="results-analysis.html#cb39-8"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">pos =</span> <span class="kw">min</span>(pos)) <span class="op">%&gt;%</span></span>
+<span id="cb39-9"><a href="results-analysis.html#cb39-9"></a><span class="st">  </span>ungroup <span class="op">%&gt;%</span></span>
+<span id="cb39-10"><a href="results-analysis.html#cb39-10"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">ID =</span> <span class="kw">as.numeric</span>(<span class="kw">as.factor</span>(alt_name)),</span>
+<span id="cb39-11"><a href="results-analysis.html#cb39-11"></a>         <span class="dt">time =</span> <span class="kw">as.numeric</span>(key))</span>
+<span id="cb39-12"><a href="results-analysis.html#cb39-12"></a></span>
+<span id="cb39-13"><a href="results-analysis.html#cb39-13"></a></span>
+<span id="cb39-14"><a href="results-analysis.html#cb39-14"></a></span>
+<span id="cb39-15"><a href="results-analysis.html#cb39-15"></a>lcmm1 &lt;-<span class="st"> </span><span class="kw">lcmm</span>(pos <span class="op">~</span><span class="st"> </span>time, <span class="dt">subject =</span> <span class="st">&quot;ID&quot;</span>,</span>
+<span id="cb39-16"><a href="results-analysis.html#cb39-16"></a>              <span class="dt">mixture =</span> <span class="op">~</span><span class="st"> </span>time,</span>
+<span id="cb39-17"><a href="results-analysis.html#cb39-17"></a>              <span class="dt">random =</span> <span class="op">~</span><span class="st"> </span>time,</span>
+<span id="cb39-18"><a href="results-analysis.html#cb39-18"></a>              <span class="dt">ng =</span> <span class="dv">4</span>,</span>
+<span id="cb39-19"><a href="results-analysis.html#cb39-19"></a>              <span class="dt">data =</span> <span class="kw">as.data.frame</span>(gmm_dat))</span></code></pre></div>
+<pre><code>## Be patient, lcmm is running ... 
+## The program took 28.1 seconds</code></pre>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="results-analysis.html#cb41-1"></a>preds &lt;-<span class="st"> </span><span class="kw">predictY</span>(lcmm1, <span class="dt">newdata =</span> <span class="kw">data.frame</span>(<span class="dt">time =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)),</span>
+<span id="cb41-2"><a href="results-analysis.html#cb41-2"></a>                  <span class="dt">draws =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb41-3"><a href="results-analysis.html#cb41-3"></a></span>
+<span id="cb41-4"><a href="results-analysis.html#cb41-4"></a>preds<span class="op">$</span>pred <span class="op">%&gt;%</span><span class="st"> </span>as.data.frame <span class="op">%&gt;%</span></span>
+<span id="cb41-5"><a href="results-analysis.html#cb41-5"></a><span class="st">  </span>gather <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb41-6"><a href="results-analysis.html#cb41-6"></a><span class="st">  </span><span class="kw">separate</span>(key, <span class="kw">c</span>(<span class="st">&quot;dis&quot;</span>, <span class="st">&quot;int&quot;</span>, <span class="st">&quot;class&quot;</span>), <span class="st">&quot;_&quot;</span>) <span class="op">%&gt;%</span></span>
+<span id="cb41-7"><a href="results-analysis.html#cb41-7"></a><span class="st">  </span><span class="kw">group_by</span>(int, class) <span class="op">%&gt;%</span></span>
+<span id="cb41-8"><a href="results-analysis.html#cb41-8"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">day =</span> <span class="kw">paste</span>(<span class="st">&quot;Day&quot;</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb41-9"><a href="results-analysis.html#cb41-9"></a><span class="st">  </span><span class="kw">spread</span>(int, value) <span class="op">%&gt;%</span></span>
+<span id="cb41-10"><a href="results-analysis.html#cb41-10"></a><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> day, <span class="dt">y =</span> <span class="st">`</span><span class="dt">50</span><span class="st">`</span>,<span class="dt">group =</span> class)) <span class="op">+</span></span>
+<span id="cb41-11"><a href="results-analysis.html#cb41-11"></a><span class="st">  </span><span class="kw">scale_y_reverse</span>() <span class="op">+</span></span>
+<span id="cb41-12"><a href="results-analysis.html#cb41-12"></a><span class="st">  </span><span class="kw">geom_ribbon</span>(<span class="kw">aes</span>(<span class="dt">ymin =</span> <span class="st">`</span><span class="dt">2.5</span><span class="st">`</span>, <span class="dt">ymax =</span> <span class="st">`</span><span class="dt">97.5</span><span class="st">`</span>), <span class="dt">alpha =</span> <span class="fl">0.2</span>) <span class="op">+</span></span>
+<span id="cb41-13"><a href="results-analysis.html#cb41-13"></a><span class="st">  </span><span class="kw">geom_line</span>() <span class="op">+</span></span>
+<span id="cb41-14"><a href="results-analysis.html#cb41-14"></a><span class="st">  </span><span class="kw">tx_def</span>()</span></code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-31-1.svg" width="672" /></p>
 
+</div>
 </div>
 </div>
             </section>

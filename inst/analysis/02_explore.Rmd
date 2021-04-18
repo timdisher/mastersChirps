@@ -126,22 +126,238 @@ score_pdat %>%
 ```
 
 
-
 ## Pool Performance
 
 ### Player Choices
 
+Player choices in each group were degined by a smaller
+number of "consensus" choices followed by a larger
+spread. The winner of the pool tended to consistently
+choose with the majority with the most start departure
+coming in group A. 
 ```{r}
-entry_picks_anon
+
+winner_picks <- entry_picks_anon %>% 
+  filter(alt_name %in% "al-Saeed, Junaid") %>%
+  select(-alt_name) %>% unlist
+
+entry_picks_anon %>% select(-alt_name) %>%
+  gather() %>%
+  group_by(value) %>%
+  summarise(picked = n()/nrow(entry_picks_anon)) %>%
+  arrange(-picked) %>%
+  mutate(value = forcats::as_factor(value),
+         winner = ifelse(value %in% winner_picks, TRUE,FALSE),
+         label = ifelse(winner == TRUE, round(picked,2), "")) %>%
+  left_join(group_dict, by = c("value" = "player")) %>%
+  mutate(group = paste("Group",group)) %>%
+  ggplot(aes(x = value, y = picked, fill = winner)) +
+  geom_col() +
+  geom_text(aes(label = label), hjust = 0, size = 2, angle = 90) +
+  tx_def() +
+  labs(y = "Probability of Being Selected",
+       x = "Player") +
+  scale_fill_discrete(name = "Winner's Picks") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  facet_grid(. ~ group, scales = "free", space = "free_x")
+
+
+```
+
+
+Correlation plots with this many dimensions are not particularly interesting
+or interpretable other than to say there are players that are selected together.
+This is partly built into to the pool since they are built into groups. Given
+that it might be interesting to look at plots separately.
+```{r}
+wide_dat %>% select(-alt_name) %>% cor(method = c("spearman")) %>%
+  ggcorrplot(type = "lower",hc.order = TRUE,
+             colors = c(plot_cols[[1]], "white", plot_cols[[2]])) +
+  tx_def() +
+  theme(axis.text.x = element_text(size = 3),
+        axis.text.y = element_text(size = 3))
+
+
+```
+
+Looking at correlation plots by selection plot doesn't offer much extra insight
+other than to provide some hope that there may indeed be some sort of pattern
+in the golfers that are chosen together. We'll hope for a little a little more
+insight into what's going on here when we get to PCA.
+
+```{r}
+
+g_dat <- group_dict %>% group_by(group) %>% nest
+
+map2(g_dat$data, c(8, 6, 4), ~ {
+
+  wide_dat %>% select(matches(.x %>% pull(player)))  %>% 
+    cor(method = c("spearman")) %>%
+  ggcorrplot(type = "lower",hc.order = TRUE,
+             colors = c(plot_cols[[1]], "white", plot_cols[[2]])) +
+  tx_def() +
+  theme(axis.text.x = element_text(size = .y),
+        axis.text.y = element_text(size = .y))
+  
+})
+
+
+```
+
+
+
+#### EVERSANA Choices
+
+Let's take a high-level look at how those in the money chose compared to the
+team from EVERSANA. It looks like you could get in the money with even a couple
+poor performers or some exceptionally low ranking golfers. The most striking
+difference between the top 5 and EVERSANA picks is that the EVERSANA picks are
+almost uniformally distributed over most of the range of possible positions while
+the top 5 generally had a high number of picks land in the top 5. Another trend
+can be seen in where EVERSANA agreed (eg, Bryson Dechambeau) who was not selected
+by any of the top 5 versus where they agreed (Justin Thomas) who was only selected
+by one player from EVERSANA. In some respects this could just be a matter of seeing
+that the people who won chose players with low scores and the people who lost didn't,
+so we'll have to bring something a little more rigorous to this down the road.
+
+```{r}
+
+top_5 <- final_scores %>% 
+  arrange(score_4) %>% 
+  slice(1:5) %>% 
+  pull(alt_name)
+
+entry_picks_anon %>% 
+  filter(alt_name %in% c(names(test_names), top_5)) %>%
+  pivot_longer(-alt_name) %>%
+  left_join(score_pdat %>% filter(name == "Day 4") %>%
+  select(player, value) %>%
+    rename(rank = value,
+           value = player)) %>%
+  arrange(rank) %>%
+    left_join(final_scores %>% select(alt_name, score_4)) %>%
+  arrange(score_4) %>%
+  mutate(
+    winner = ifelse(alt_name %in% top_5, "Top 5", "EVERSANA"),
+    alt_name = glue::glue("{alt_name} ({score_4})"),
+    value = glue::glue("{value} ({rank})"),
+    alt_name = forcats::as_factor(alt_name)
+    ) %>%
+  arrange(rank) %>%
+  mutate(value = forcats::as_factor(value)) %>%
+  ggplot(aes(x = alt_name, y = value, colour = winner)) +
+  geom_point() +
+  tx_def() +
+  scale_colour_es(name = "Top 5 vs EVERSANA", "primary") +
+  labs(title = "EVERSANA Player Selections", x = "", y = "") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+
+
 ```
 
 ## Player Performance
 
-## Overall
+Lastly let's take a look at player performance. We saw that with golfers there
+was a big swing in the ranks over time, but how did that translate into the pool?
 
-## Team Highlight
+### Overall
 
 ```{r}
-final_scores
+p_bp <- 
+  final_scores %>%
+  gather("key", "value", -c(alt_name)) %>%
+  mutate(key = factor(key, labels = c("Day 1", "Day 2", "Day 3", "Day 4"))) %>%
+  group_by(key) %>%
+  arrange(key, value) %>%
+  mutate(pos = 1:n()) %>%
+  group_by(key, value) %>%
+  mutate(pos = min(pos)) %>%
+  group_by(alt_name) %>%
+  mutate(sd = sd(pos),
+         diff = max(pos) - min(pos)) %>%
+  ggplot(aes(x = key, y = pos, group = alt_name)) +
+  labs(x = "Day of Tournament", y = "Total Score") +
+  scale_y_reverse() + 
+  geom_line() + 
+  tx_def()
+ 
+p_bp + labs(title = "Rank - All players")
+  
+
+```
+
+So similar to the golfer situation we can see a lot of people were in the top ten
+at some point and there are some pretty drastic flips. We can see maybe a group
+of people who started of well and stayed doing well, an opposite group, and then
+a bunch of zig-zags somewhere in the middle. 
+```{r}
+p_bp + 
+  gghighlight(min(pos) <= 10) + 
+  labs(title = "Leaderboard over time - Ever in Top 10") +
+  geom_hline(yintercept = 10, colour = plot_cols[[2]])
+```
+
+What's prety interesting is that it seems that most people who finished in the top
+10 didn't start there and almost half were out of the top 10 on day three. That said
+the winner more or less declared themselves on day two and never went back. 
+```{r}
+
+p_bp + 
+  gghighlight(last(pos) <= 10) + 
+  labs(title = "Leaderboard over time - Finished in top 10") +
+  geom_hline(yintercept = 10, colour = plot_cols[[2]])
+
+
+```
+
+Now let's do the opposite of this and take a look at the worst performers. It
+looks like if you had a bad first day you could escape doing very poorly but
+it was difficult to ever to better than 150 if you were ever worse than 200. We can
+also see that starting well doesn't mean anything, presumably because you a bad
+second day across multiple players is impossible to recover from. 
+
+```{r}
+p_bp + 
+  gghighlight(max(pos) > 200) + 
+  labs(title = "Leaderboard over time - Ever worse than 200") +
+  geom_hline(yintercept = 200, colour = plot_cols[[2]])
+```
+
+I think one of the most fascinating things about this tournament rank data is 
+how much variability people have across days. So let's highlight some groups
+with high variability. Using a cut-point of 50 for the standard deviation in
+position provides a nice grop of players who had an exciting pool. This includes
+people who started high and had precipitous drops as well as the opposite and then
+people who are somewhere in-between.
+
+```{r}
+
+p_bp + 
+  gghighlight(sd > 50) + 
+  labs(title = "Leaderboard over time - Rank SD > 50") +
+  geom_hline(yintercept = 200, colour = plot_cols[[2]])
+
+```
+
+Another way of looking at this is to find players who had a difference of more
+than 150 in their best and worst scores. 
+```{r}
+
+p_bp + 
+  gghighlight(diff > 150) + 
+  labs(title = "Leaderboard over time - Difference in best and worst rank > 150") +
+  geom_hline(yintercept = 200, colour = plot_cols[[2]])
+
+```
+
+Finally let's see the EVERSANA crew.
+
+```{r}
+
+p_bp + 
+  gghighlight(alt_name %in% names(test_names)) + 
+  labs(title = "Leaderboard over time - Difference in best and worst rank > 150") +
+  geom_hline(yintercept = 200, colour = plot_cols[[2]])
 
 ```

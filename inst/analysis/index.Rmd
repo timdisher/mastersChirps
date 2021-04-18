@@ -20,25 +20,29 @@ link-citations: yes
 knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE, dev="svg")
 devtools::load_all()
 library(xfun) # Flexible caching - flag to remove if everything runs quickly
-library(ggbiplot) # Used for PCA
-library(ggimage) # Add images to plots
 library(tidyverse)
 library(data.validator) # Create nice validation report
 library(assertr)
-library(sjlabelled) # Create variable labels
 library(DT)
 library(xaringanthemer) # For theming plots
 library(gghighlight) # Simple highlighting
-
+library(lcmm)
+library(ggcorrplot)
+library(factoextra)
 
 # Match style being used in slides
 style_mono_light(
   base_color = "#002F6C",
   title_slide_text_color = "white",
   link_color = "#ED8B00",
-  text_bold_color = "#ED8B00",
+  header_color = "#ED8B00",
   white_color = "#FFFFFF"
 )
+
+plot_cols <- c("#002F6C", "#ED8B00", "#DC4405", "#007398", "#7FA9AE", "#B1B3B3", 
+"#565a5c")
+
+
 
 devtools::load_all(quiet = TRUE)
 ```
@@ -46,4 +50,19 @@ devtools::load_all(quiet = TRUE)
 # Project Information
 
 This project uses a Masters pool that me and some friends joined as a way to 
-explore web/pdf scraping and a quick/fun look at clustering with PCA.
+explore web/pdf scraping and a quick/fun look at clustering with PCA and growth
+mixture models. This was intended as a quick project for the sake of learning so
+analyses are not as rigorous as would be expected for a serious project. Prepare
+for typos!
+
+## Ideas explored
+
+In addition to practicing analyses this project also provides a sandbox for some
+of the project workflow/visualization ideas I am working on:
+
+- Use of bookdown to organize analyses using `serve_book()` instead of sourcing
+scripts.
+- .gitignore that requires explicit inclusion of data files
+- Use of `{xaringan}`/`{xaringanthemer}`
+- Use of `{data.validator}` for data validation
+- Use of `gghighlight`

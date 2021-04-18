@@ -1,0 +1,33 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+# Conclusions
+
+## Findings
+
+Participants in the masters pool did not appear to show clusters of golfer
+choices. My original hypothesis was that actual golfers themselves would be
+selected in groups by pool participants who actually followed golf but player
+selections themselves were generally uncorrelated. This lead to poor performance
+on PCA and subsequently a mostly meaningless kmeans clustering exercise.
+Participant performance could be reasonably described by their membership in one
+of four profiles. Strong performers started and finished higher on the
+leaderboard and generally selected players whose pre-masters PGA ranking was
+lower than those in other groups. Poor performers chose players with higher PGA
+ranks and were more likely to choose unranked golfers or golfers with ranks
+worse than 100. Improvers and Decliners chose similarly ranked golfers although
+point estimates were different than expected. In future work it might be
+interesting to see how a kmeans or longitudinal kmeans would have performed on
+the outcome data although the GMM framework is nice and worked well in this
+case.
+
+## Next steps
+
+This was a nice introduction to some applied clustering on characteristics/outcomes
+for me. It was a great opportunity to actually work through an example where clustering on characteristics (player choice) did not provide much insight but clustering on outcome did. Next steps for me will be to start to build
+a workflow around these tools, and investigate some other options (eg, infinite
+mixture models). Overall I am very happy with the packages used in this project.
+I would definitely use gghighlight again. In the future I might want to play a 
+little more with animations.

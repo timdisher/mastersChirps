@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>4 Analysis | Masters analysis Report</title>
+  <meta name="description" content="4 Analysis | Masters analysis Report" />
+  <meta name="generator" content="bookdown 0.21.10 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="4 Analysis | Masters analysis Report" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="4 Analysis | Masters analysis Report" />
+  
+  
+  
+
+<meta name="author" content="Tim Disher" />
+
+
+<meta name="date" content="2021-04-18" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="initial-data-exploration.html"/>
+<link rel="next" href="conclusions.html"/>
+<script src="libs/jquery-3.5.1/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<script src="libs/accessible-code-block-0.0.1/empty-anchor.js"></script>
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+<script src="libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
+<link href="libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+<script src="libs/datatables-binding-0.17/datatables.js"></script>
+<link href="libs/dt-core-1.10.20/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="libs/dt-core-1.10.20/css/jquery.dataTables.extra.css" rel="stylesheet" />
+<script src="libs/dt-core-1.10.20/js/jquery.dataTables.min.js"></script>
+<link href="libs/crosstalk-1.1.1/css/crosstalk.css" rel="stylesheet" />
+<script src="libs/crosstalk-1.1.1/js/crosstalk.min.js"></script>
+<script>
+/* ========================================================================
+ * Bootstrap: transition.js v3.3.7
+ * http://getbootstrap.com/javascript/#transitions
+ * ========================================================================
+ * Copyright 2011-2016 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * ======================================================================== */
+
+
++function ($) {
+  'use strict';
+
+  // CSS TRANSITION SUPPORT (Shoutout: http://www.modernizr.com/)
+  // ============================================================
+
+  function transitionEnd() {
+    var el = document.createElement('bootstrap')
+
+    var transEndEventNames = {
+      WebkitTransition : 'webkitTransitionEnd',
+      MozTransition    : 'transitionend',
+      OTransition      : 'oTransitionEnd otransitionend',
+      transition       : 'transitionend'
+    }
+
+    for (var name in transEndEventNames) {
+      if (el.style[name] !== undefined) {
+        return { end: transEndEventNames[name] }
+      }
+    }
+
+    return false // explicit for ie8 (  ._.)
+  }
+
+  // http://blog.alexmaccaw.com/css-transitions
+  $.fn.emulateTransitionEnd = function (duration) {
+    var called = false
+    var $el = this
+    $(this).one('bsTransitionEnd', function () { called = true })
+    var callback = function () { if (!called) $($el).trigger($.support.transition.end) }
+    setTimeout(callback, duration)
+    return this
+  }
+
+  $(function () {
+    $.support.transition = transitionEnd()
+
+    if (!$.support.transition) return
+
+    $.event.special.bsTransitionEnd = {
+      bindType: $.support.transition.end,
+      delegateType: $.support.transition.end,
+      handle: function (e) {
+        if ($(e.target).is(this)) return e.handleObj.handler.apply(this, arguments)
+      }
+    }
+  })
+
+}(jQuery);
+</script>
+<script>
+/* ========================================================================
+ * Bootstrap: collapse.js v3.3.7
+ * http://getbootstrap.com/javascript/#collapse
+ * ========================================================================
+ * Copyright 2011-2016 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * ======================================================================== */
+
+/* jshint latedef: false */
+
++function ($) {
+  'use strict';
+
+  // COLLAPSE PUBLIC CLASS DEFINITION
+  // ================================
+
+  var Collapse = function (element, options) {
+    this.$element      = $(element)
+    this.options       = $.extend({}, Collapse.DEFAULTS, options)
+    this.$trigger      = $('[data-toggle="collapse"][href="#' + element.id + '"],' +
+                           '[data-toggle="collapse"][data-target="#' + element.id + '"]')
+    this.transitioning = null
+
+    if (this.options.parent) {
+      this.$parent = this.getParent()
+    } else {
+      this.addAriaAndCollapsedClass(this.$element, this.$trigger)
+    }
+
+    if (this.options.toggle) this.toggle()
+  }
+
+  Collapse.VERSION  = '3.3.7'
+
+  Collapse.TRANSITION_DURATION = 350
+
+  Collapse.DEFAULTS = {
+    toggle: true
+  }
+
+  Collapse.prototype.dimension = function () {
+    var hasWidth = this.$element.hasClass('width')
+    return hasWidth ? 'width' : 'height'
+  }
+
+  Collapse.prototype.show = function () {
+    if (this.transitioning || this.$element.hasClass('in')) return
+
+    var activesData
+    var actives = this.$parent && this.$parent.children('.panel').children('.in, .collapsing')
+
+    if (actives && actives.length) {
+      activesData = actives.data('bs.collapse')
+      if (activesData && activesData.transitioning) return
+    }
+
+    var startEvent = $.Event('show.bs.collapse')
+    this.$element.trigger(startEvent)
+    if (startEvent.isDefaultPrevented()) return
+
+    if (actives && actives.length) {
+      Plugin.call(actives, 'hide')
+      activesData || actives.data('bs.collapse', null)
+    }
+
+    var dimension = this.dimension()
+
+    this.$element
+      .removeClass('collapse')
+      .addClass('collapsing')[dimension](0)
+      .attr('aria-expanded', true)
+
+    this.$trigger
+      .removeClass('collapsed')
+      .attr('aria-expanded', true)
+
+    this.transitioning = 1
+
+    var complete = function () {
+      this.$element
+        .removeClass('collapsing')
+        .addClass('collapse in')[dimension]('')
+      this.transitioning = 0
+      this.$element
+        .trigger('shown.bs.collapse')
+    }
+
+    if (!$.support.transition) return complete.call(this)
+
+    var scrollSize = $.camelCase(['scroll', dimension].join('-'))
+
+    this.$element
+      .one('bsTransitionEnd', $.proxy(complete, this))
+      .emulateTransitionEnd(Collapse.TRANSITION_DURATION)[dimension](this.$element[0][scrollSize])
+  }
+
+  Collapse.prototype.hide = function () {
+    if (this.transitioning || !this.$element.hasClass('in')) return
+
+    var startEvent = $.Event('hide.bs.collapse')
+    this.$element.trigger(startEvent)
+    if (startEvent.isDefaultPrevented()) return
+
+    var dimension = this.dimension()
+
+    this.$element[dimension](this.$element[dimension]())[0].offsetHeight
+
+    this.$element
+      .addClass('collapsing')
+      .removeClass('collapse in')
+      .attr('aria-expanded', false)
+
+    this.$trigger
+      .addClass('collapsed')
+      .attr('aria-expanded', false)
+
+    this.transitioning = 1
+
+    var complete = function () {
+      this.transitioning = 0
+      this.$element
+        .removeClass('collapsing')
+        .addClass('collapse')
+        .trigger('hidden.bs.collapse')
+    }
+
+    if (!$.support.transition) return complete.call(this)
+
+    this.$element
+      [dimension](0)
+      .one('bsTransitionEnd', $.proxy(complete, this))
+      .emulateTransitionEnd(Collapse.TRANSITION_DURATION)
+  }
+
+  Collapse.prototype.toggle = function () {
+    this[this.$element.hasClass('in') ? 'hide' : 'show']()
+  }
+
+  Collapse.prototype.getParent = function () {
+    return $(this.options.parent)
+      .find('[data-toggle="collapse"][data-parent="' + this.options.parent + '"]')
+      .each($.proxy(function (i, element) {
+        var $element = $(element)
+        this.addAriaAndCollapsedClass(getTargetFromTrigger($element), $element)
+      }, this))
+      .end()
+  }
+
+  Collapse.prototype.addAriaAndCollapsedClass = function ($element, $trigger) {
+    var isOpen = $element.hasClass('in')
+
+    $element.attr('aria-expanded', isOpen)
+    $trigger
+      .toggleClass('collapsed', !isOpen)
+      .attr('aria-expanded', isOpen)
+  }
+
+  function getTargetFromTrigger($trigger) {
+    var href
+    var target = $trigger.attr('data-target')
+      || (href = $trigger.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '') // strip for ie7
+
+    return $(target)
+  }
+
+
+  // COLLAPSE PLUGIN DEFINITION
+  // ==========================
+
+  function Plugin(option) {
+    return this.each(function () {
+      var $this   = $(this)
+      var data    = $this.data('bs.collapse')
+      var options = $.extend({}, Collapse.DEFAULTS, $this.data(), typeof option == 'object' && option)
+
+      if (!data && options.toggle && /show|hide/.test(option)) options.toggle = false
+      if (!data) $this.data('bs.collapse', (data = new Collapse(this, options)))
+      if (typeof option == 'string') data[option]()
+    })
+  }
+
+  var old = $.fn.collapse
+
+  $.fn.collapse             = Plugin
+  $.fn.collapse.Constructor = Collapse
+
+
+  // COLLAPSE NO CONFLICT
+  // ====================
+
+  $.fn.collapse.noConflict = function () {
+    $.fn.collapse = old
+    return this
+  }
+
+
+  // COLLAPSE DATA-API
+  // =================
+
+  $(document).on('click.bs.collapse.data-api', '[data-toggle="collapse"]', function (e) {
+    var $this   = $(this)
+
+    if (!$this.attr('data-target')) e.preventDefault()
+
+    var $target = getTargetFromTrigger($this)
+    var data    = $target.data('bs.collapse')
+    var option  = data ? 'toggle' : $this.data()
+
+    Plugin.call($target, option)
+  })
+
+}(jQuery);
+</script>
+<script>
+window.initializeCodeFolding = function(show) {
+
+  // handlers for show-all and hide all
+  $("#rmd-show-all-code").click(function() {
+    // close the dropdown menu when an option is clicked
+    $("#allCodeButton").dropdown("toggle");
+    $('div.r-code-collapse').each(function() {
+      $(this).collapse('show');
+    });
+  });
+  $("#rmd-hide-all-code").click(function() {
+    // close the dropdown menu when an option is clicked
+    $("#allCodeButton").dropdown("toggle");
+    $('div.r-code-collapse').each(function() {
+      $(this).collapse('hide');
+    });
+  });
+
+  // index for unique code element ids
+  var currentIndex = 1;
+
+  // select all R code blocks
+  var rCodeBlocks = $('pre.sourceCode, pre.r, pre.python, pre.bash, pre.sql, pre.cpp, pre.stan');
+  rCodeBlocks.each(function() {
+
+    // if code block has been labeled with class `fold-show`, show the code on init!
+    var classList = $(this).attr('class').split(/\s+/);
+    for (var i = 0; i < classList.length; i++) {
+    if (classList[i] === 'fold-show') {
+        show = true;
+      }
+    }
+
+    // create a collapsable div to wrap the code in
+    var div = $('<div class="collapse r-code-collapse"></div>');
+    if (show)
+      div.addClass('in');
+    var id = 'rcode-643E0F36' + currentIndex++;
+    div.attr('id', id);
+    $(this).before(div);
+    $(this).detach().appendTo(div);
+
+    // add a show code button right above
+    var showCodeText = $('<span>' + (show ? 'Hide' : 'Code') + '</span>');
+    var showCodeButton = $('<button type="button" class="btn btn-default btn-xs code-folding-btn pull-right"></button>');
+    showCodeButton.append(showCodeText);
+    showCodeButton
+        .attr('data-toggle', 'collapse')
+        .attr('data-target', '#' + id)
+        .attr('aria-expanded', show)
+        .attr('aria-controls', id);
+
+    var buttonRow = $('<div class="row"></div>');
+    var buttonCol = $('<div class="col-md-12"></div>');
+
+    buttonCol.append(showCodeButton);
+    buttonRow.append(buttonCol);
+
+    div.before(buttonRow);
+
+    // hack: return show to false, otherwise all next codeBlocks will be shown!
+    show = false;
+
+    // update state of button on show/hide
+    div.on('hidden.bs.collapse', function () {
+      showCodeText.text('Code');
+    });
+    div.on('show.bs.collapse', function () {
+      showCodeText.text('Hide');
+    });
+  });
+
+}
+</script>
+<script>
+/* ========================================================================
+ * Bootstrap: dropdown.js v3.3.7
+ * http://getbootstrap.com/javascript/#dropdowns
+ * ========================================================================
+ * Copyright 2011-2016 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * ======================================================================== */
+
+
++function ($) {
+  'use strict';
+
+  // DROPDOWN CLASS DEFINITION
+  // =========================
+
+  var backdrop = '.dropdown-backdrop'
+  var toggle   = '[data-toggle="dropdown"]'
+  var Dropdown = function (element) {
+    $(element).on('click.bs.dropdown', this.toggle)
+  }
+
+  Dropdown.VERSION = '3.3.7'
+
+  function getParent($this) {
+    var selector = $this.attr('data-target')
+
+    if (!selector) {
+      selector = $this.attr('href')
+      selector = selector && /#[A-Za-z]/.test(selector) && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
+    }
+
+    var $parent = selector && $(selector)
+
+    return $parent && $parent.length ? $parent : $this.parent()
+  }
+
+  function clearMenus(e) {
+    if (e && e.which === 3) return
+    $(backdrop).remove()
+    $(toggle).each(function () {
+      var $this         = $(this)
+      var $parent       = getParent($this)
+      var relatedTarget = { relatedTarget: this }
+
+      if (!$parent.hasClass('open')) return
+
+      if (e && e.type == 'click' && /input|textarea/i.test(e.target.tagName) && $.contains($parent[0], e.target)) return
+
+      $parent.trigger(e = $.Event('hide.bs.dropdown', relatedTarget))
+
+      if (e.isDefaultPrevented()) return
+
+      $this.attr('aria-expanded', 'false')
+      $parent.removeClass('open').trigger($.Event('hidden.bs.dropdown', relatedTarget))
+    })
+  }
+
+  Dropdown.prototype.toggle = function (e) {
+    var $this = $(this)
+
+    if ($this.is('.disabled, :disabled')) return
+
+    var $parent  = getParent($this)
+    var isActive = $parent.hasClass('open')
+
+    clearMenus()
+
+    if (!isActive) {
+      if ('ontouchstart' in document.documentElement && !$parent.closest('.navbar-nav').length) {
+        // if mobile we use a backdrop because click events don't delegate
+        $(document.createElement('div'))
+          .addClass('dropdown-backdrop')
+          .insertAfter($(this))
+          .on('click', clearMenus)
+      }
+
+      var relatedTarget = { relatedTarget: this }
+      $parent.trigger(e = $.Event('show.bs.dropdown', relatedTarget))
+
+      if (e.isDefaultPrevented()) return
+
+      $this
+        .trigger('focus')
+        .attr('aria-expanded', 'true')
+
+      $parent
+        .toggleClass('open')
+        .trigger($.Event('shown.bs.dropdown', relatedTarget))
+    }
+
+    return false
+  }
+
+  Dropdown.prototype.keydown = function (e) {
+    if (!/(38|40|27|32)/.test(e.which) || /input|textarea/i.test(e.target.tagName)) return
+
+    var $this = $(this)
+
+    e.preventDefault()
+    e.stopPropagation()
+
+    if ($this.is('.disabled, :disabled')) return
+
+    var $parent  = getParent($this)
+    var isActive = $parent.hasClass('open')
+
+    if (!isActive && e.which != 27 || isActive && e.which == 27) {
+      if (e.which == 27) $parent.find(toggle).trigger('focus')
+      return $this.trigger('click')
+    }
+
+    var desc = ' li:not(.disabled):visible a'
+    var $items = $parent.find('.dropdown-menu' + desc)
+
+    if (!$items.length) return
+
+    var index = $items.index(e.target)
+
+    if (e.which == 38 && index > 0)                 index--         // up
+    if (e.which == 40 && index < $items.length - 1) index++         // down
+    if (!~index)                                    index = 0
+
+    $items.eq(index).trigger('focus')
+  }
+
+
+  // DROPDOWN PLUGIN DEFINITION
+  // ==========================
+
+  function Plugin(option) {
+    return this.each(function () {
+      var $this = $(this)
+      var data  = $this.data('bs.dropdown')
+
+      if (!data) $this.data('bs.dropdown', (data = new Dropdown(this)))
+      if (typeof option == 'string') data[option].call($this)
+    })
+  }
+
+  var old = $.fn.dropdown
+
+  $.fn.dropdown             = Plugin
+  $.fn.dropdown.Constructor = Dropdown
+
+
+  // DROPDOWN NO CONFLICT
+  // ====================
+
+  $.fn.dropdown.noConflict = function () {
+    $.fn.dropdown = old
+    return this
+  }
+
+
+  // APPLY TO STANDARD DROPDOWN ELEMENTS
+  // ===================================
+
+  $(document)
+    .on('click.bs.dropdown.data-api', clearMenus)
+    .on('click.bs.dropdown.data-api', '.dropdown form', function (e) { e.stopPropagation() })
+    .on('click.bs.dropdown.data-api', toggle, Dropdown.prototype.toggle)
+    .on('keydown.bs.dropdown.data-api', toggle, Dropdown.prototype.keydown)
+    .on('keydown.bs.dropdown.data-api', '.dropdown-menu', Dropdown.prototype.keydown)
+
+}(jQuery);
+</script>
+<style type="text/css">
+.code-folding-btn {
+  margin-bottom: 4px;
+}
+
+.row { display: flex; }
+.collapse { display: none; }
+.in { display:block }
+.pull-right > .dropdown-menu {
+    right: 0;
+    left: auto;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    min-width: 160px;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    font-size: 14px;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+}
+
+.open > .dropdown-menu {
+    display: block;
+    color: #ffffff;
+    background-color: #ffffff;
+    background-image: none;
+    border-color: #92897e;
+}
+
+.dropdown-menu > li > a {
+  display: block;
+  padding: 3px 20px;
+  clear: both;
+  font-weight: 400;
+  line-height: 1.42857143;
+  color: #000000;
+  white-space: nowrap;
+}
+
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus {
+  color: #ffffff;
+  text-decoration: none;
+  background-color: #e95420;
+}
+
+.dropdown-menu > .active > a,
+.dropdown-menu > .active > a:hover,
+.dropdown-menu > .active > a:focus {
+  color: #ffffff;
+  text-decoration: none;
+  background-color: #e95420;
+  outline: 0;
+}
+.dropdown-menu > .disabled > a,
+.dropdown-menu > .disabled > a:hover,
+.dropdown-menu > .disabled > a:focus {
+  color: #aea79f;
+}
+
+.dropdown-menu > .disabled > a:hover,
+.dropdown-menu > .disabled > a:focus {
+  text-decoration: none;
+  cursor: not-allowed;
+  background-color: transparent;
+  background-image: none;
+  filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+}
+
+.btn {
+  display: inline-block;
+  margin-bottom: 1;
+  font-weight: normal;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+      touch-action: manipulation;
+  cursor: pointer;
+  background-image: none;
+  border: 1px solid transparent;
+  padding: 4px 8px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  border-radius: 4px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.btn:focus,
+.btn:active:focus,
+.btn.active:focus,
+.btn.focus,
+.btn:active.focus,
+.btn.active.focus {
+  outline: 5px auto -webkit-focus-ring-color;
+  outline-offset: -2px;
+}
+.btn:hover,
+.btn:focus,
+.btn.focus {
+  color: #ffffff;
+  text-decoration: none;
+}
+.btn:active,
+.btn.active {
+  background-image: none;
+  outline: 0;
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+.btn.disabled,
+.btn[disabled],
+fieldset[disabled] .btn {
+  cursor: not-allowed;
+  filter: alpha(opacity=65);
+  opacity: 0.65;
+  box-shadow: none;
+}
+a.btn.disabled,
+fieldset[disabled] a.btn {
+  pointer-events: none;
+}
+.btn-default {
+  color: #ffffff;
+  background-color: #aea79f; #important
+  border-color: #aea79f;
+}
+
+.btn-default:focus,
+.btn-default.focus {
+  color: #ffffff;
+  background-color: #978e83;
+  border-color: #6f675e;
+}
+
+.btn-default:hover {
+  color: #ffffff;
+  background-color: #978e83;
+  border-color: #92897e;
+}
+.btn-default:active,
+.btn-default.active,
+.btn-group > .btn:not(:first-child):not(:last-child):not(.dropdown-toggle) {
+  border-radius: 0;
+}
+.btn-group > .btn:first-child {
+  margin-left: 0;
+}
+.btn-group > .btn:first-child:not(:last-child):not(.dropdown-toggle) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.btn-group > .btn:last-child:not(:first-child),
+.btn-group > .dropdown-toggle:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.btn-group > .btn-group {
+  float: left;
+}
+.btn-group > .btn-group:not(:first-child):not(:last-child) > .btn {
+  border-radius: 0;
+}
+.btn-group > .btn-group:first-child:not(:last-child) > .btn:last-child,
+.btn-group > .btn-group:first-child:not(:last-child) > .dropdown-toggle {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.btn-group > .btn-group:last-child:not(:first-child) > .btn:first-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.btn-group .dropdown-toggle:active,
+.btn-group.open .dropdown-toggle {
+  outline: 0;
+}
+.btn-group > .btn + .dropdown-toggle {
+  padding-right: 8px;
+  padding-left: 8px;
+}
+.btn-group > .btn-lg + .dropdown-toggle {
+  padding-right: 12px;
+  padding-left: 12px;
+}
+.btn-group.open .dropdown-toggle {
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+.btn-group.open .dropdown-toggle.btn-link {
+  box-shadow: none;
+}
+
+</style>
+<script>
+var str = '<div class="btn-group pull-right" style="position: fixed; right: 50px; top: 10px; z-index: 200"><button type="button" class="btn btn-default btn-xs dropdown-toggle" id="allCodeButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" data-_extension-text-contrast=""><span>Code</span> <span class="caret"></span></button><ul class="dropdown-menu" style="min-width: 50px;"><li><a id="rmd-show-all-code" href="#">Show All Code</a></li><li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li></ul></div>';
+document.write(str);
+</script>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("show" === "hide");
+});
+</script>
+
+
+<style type="text/css">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Project Information</a><ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#ideas-explored"><i class="fa fa-check"></i><b>1.1</b> Ideas explored</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="import-and-clean-data.html"><a href="import-and-clean-data.html"><i class="fa fa-check"></i><b>2</b> Import and Clean Data</a><ul>
+<li class="chapter" data-level="2.1" data-path="import-and-clean-data.html"><a href="import-and-clean-data.html#selection-data"><i class="fa fa-check"></i><b>2.1</b> Selection Data</a></li>
+<li class="chapter" data-level="2.2" data-path="import-and-clean-data.html"><a href="import-and-clean-data.html#leaderboard-data"><i class="fa fa-check"></i><b>2.2</b> Leaderboard Data</a></li>
+<li class="chapter" data-level="2.3" data-path="import-and-clean-data.html"><a href="import-and-clean-data.html#calculate-daily-scores-for-pool-participants"><i class="fa fa-check"></i><b>2.3</b> Calculate Daily Scores for Pool Participants</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="initial-data-exploration.html"><a href="initial-data-exploration.html"><i class="fa fa-check"></i><b>3</b> Initial Data Exploration</a><ul>
+<li class="chapter" data-level="3.1" data-path="initial-data-exploration.html"><a href="initial-data-exploration.html#golfer-performance"><i class="fa fa-check"></i><b>3.1</b> Golfer Performance</a></li>
+<li class="chapter" data-level="3.2" data-path="initial-data-exploration.html"><a href="initial-data-exploration.html#pool-performance"><i class="fa fa-check"></i><b>3.2</b> Pool Performance</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="initial-data-exploration.html"><a href="initial-data-exploration.html#player-choices"><i class="fa fa-check"></i><b>3.2.1</b> Player Choices</a></li>
+</ul></li>
+<li class="chapter" data-level="3.3" data-path="initial-data-exploration.html"><a href="initial-data-exploration.html#player-performance"><i class="fa fa-check"></i><b>3.3</b> Player Performance</a><ul>
+<li class="chapter" data-level="3.3.1" data-path="initial-data-exploration.html"><a href="initial-data-exploration.html#overall"><i class="fa fa-check"></i><b>3.3.1</b> Overall</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="analysis.html"><a href="analysis.html"><i class="fa fa-check"></i><b>4</b> Analysis</a><ul>
+<li class="chapter" data-level="4.1" data-path="analysis.html"><a href="analysis.html#player-choice-clustering"><i class="fa fa-check"></i><b>4.1</b> Player Choice Clustering</a><ul>
+<li class="chapter" data-level="4.1.1" data-path="analysis.html"><a href="analysis.html#growth-mixture-model"><i class="fa fa-check"></i><b>4.1.1</b> Growth Mixture Model</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="conclusions.html"><a href="conclusions.html"><i class="fa fa-check"></i><b>5</b> Conclusions</a><ul>
+<li class="chapter" data-level="5.1" data-path="conclusions.html"><a href="conclusions.html#findings"><i class="fa fa-check"></i><b>5.1</b> Findings</a></li>
+<li class="chapter" data-level="5.2" data-path="conclusions.html"><a href="conclusions.html#next-steps"><i class="fa fa-check"></i><b>5.2</b> Next steps</a></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Masters analysis Report</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="analysis" class="section level1">
+<h1><span class="header-section-number">4</span> Analysis</h1>
+<div id="player-choice-clustering" class="section level2">
+<h2><span class="header-section-number">4.1</span> Player Choice Clustering</h2>
+<p>First let’s see if there’s any interesting patterns in player choices.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="analysis.html#cb31-1"></a>golfer.pca &lt;-<span class="st"> </span><span class="kw">prcomp</span>(wide_dat[,<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb31-2"><a href="analysis.html#cb31-2"></a></span>
+<span id="cb31-3"><a href="analysis.html#cb31-3"></a></span>
+<span id="cb31-4"><a href="analysis.html#cb31-4"></a><span class="kw">summary</span>(golfer.pca)</span></code></pre></div>
+<pre><code>## Importance of components:
+##                            PC1     PC2     PC3    PC4     PC5     PC6     PC7     PC8     PC9    PC10    PC11    PC12    PC13
+## Standard deviation     0.62297 0.59010 0.53747 0.5280 0.50823 0.50156 0.46683 0.45066 0.44262 0.43355 0.40197 0.39182 0.38125
+## Proportion of Variance 0.06528 0.05858 0.04859 0.0469 0.04345 0.04232 0.03666 0.03416 0.03296 0.03162 0.02718 0.02583 0.02445
+## Cumulative Proportion  0.06528 0.12386 0.17245 0.2193 0.26280 0.30512 0.34178 0.37594 0.40890 0.44051 0.46769 0.49352 0.51797
+##                           PC14    PC15    PC16   PC17    PC18    PC19    PC20    PC21    PC22    PC23    PC24    PC25    PC26
+## Standard deviation     0.37416 0.36402 0.35479 0.3491 0.34056 0.33048 0.32658 0.31780 0.30817 0.30574 0.29249 0.29141 0.28794
+## Proportion of Variance 0.02355 0.02229 0.02117 0.0205 0.01951 0.01837 0.01794 0.01699 0.01597 0.01572 0.01439 0.01428 0.01395
+## Cumulative Proportion  0.54152 0.56381 0.58498 0.6055 0.62499 0.64336 0.66131 0.67830 0.69427 0.70999 0.72439 0.73867 0.75262
+##                           PC27    PC28    PC29    PC30   PC31    PC32    PC33    PC34    PC35    PC36    PC37    PC38    PC39
+## Standard deviation     0.28300 0.27352 0.27208 0.26291 0.2558 0.25330 0.25135 0.24832 0.23910 0.23348 0.22027 0.21965 0.21697
+## Proportion of Variance 0.01347 0.01258 0.01245 0.01163 0.0110 0.01079 0.01063 0.01037 0.00962 0.00917 0.00816 0.00812 0.00792
+## Cumulative Proportion  0.76609 0.77867 0.79113 0.80275 0.8138 0.82455 0.83518 0.84555 0.85516 0.86433 0.87250 0.88061 0.88853
+##                           PC40    PC41   PC42    PC43    PC44    PC45    PC46    PC47    PC48    PC49    PC50    PC51   PC52
+## Standard deviation     0.20504 0.20456 0.1995 0.19582 0.19084 0.18701 0.18378 0.18289 0.18222 0.17804 0.17003 0.16669 0.1598
+## Proportion of Variance 0.00707 0.00704 0.0067 0.00645 0.00613 0.00588 0.00568 0.00563 0.00559 0.00533 0.00486 0.00467 0.0043
+## Cumulative Proportion  0.89560 0.90264 0.9093 0.91579 0.92191 0.92780 0.93348 0.93911 0.94469 0.95002 0.95489 0.95956 0.9639
+##                           PC53    PC54   PC55    PC56   PC57    PC58    PC59    PC60    PC61    PC62    PC63    PC64    PC65
+## Standard deviation     0.15848 0.13534 0.1244 0.12278 0.1193 0.11639 0.11340 0.10596 0.09852 0.09748 0.09228 0.08827 0.08432
+## Proportion of Variance 0.00422 0.00308 0.0026 0.00254 0.0024 0.00228 0.00216 0.00189 0.00163 0.00160 0.00143 0.00131 0.00120
+## Cumulative Proportion  0.96808 0.97116 0.9738 0.97630 0.9787 0.98098 0.98314 0.98503 0.98666 0.98826 0.98969 0.99100 0.99220
+##                           PC66    PC67    PC68    PC69    PC70    PC71    PC72    PC73    PC74    PC75    PC76    PC77    PC78
+## Standard deviation     0.08074 0.07811 0.07650 0.06998 0.05911 0.05795 0.05495 0.05444 0.05370 0.05088 0.04717 0.03898 0.03103
+## Proportion of Variance 0.00110 0.00103 0.00098 0.00082 0.00059 0.00056 0.00051 0.00050 0.00049 0.00044 0.00037 0.00026 0.00016
+## Cumulative Proportion  0.99329 0.99432 0.99530 0.99613 0.99672 0.99728 0.99779 0.99829 0.99877 0.99921 0.99958 0.99984 1.00000
+##                             PC79     PC80     PC81
+## Standard deviation     2.946e-16 1.87e-16 6.46e-17
+## Proportion of Variance 0.000e+00 0.00e+00 0.00e+00
+## Cumulative Proportion  1.000e+00 1.00e+00 1.00e+00</code></pre>
+<p>So unfortunately, as is usually the case, we don’t really see great performance
+until we hit the 30th principal component which means the plots for clustering
+aren’t all that informative. In an ideal world we’d see the nice situation where
+the first and second components explain a huge chunk of variance. Perhaps this
+shouldn’t be too Let’s just jump straight to kmeans on this and see if anything
+interesting comes up. Unfortunately the within sum of square approach is telling
+us we should have something like 40 clusters which is too much to be interesting.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="analysis.html#cb33-1"></a><span class="kw">fviz_nbclust</span>(golfer.pca<span class="op">$</span>x[,<span class="dv">1</span><span class="op">:</span><span class="dv">30</span>], kmeans, <span class="dt">method =</span> <span class="st">&quot;wss&quot;</span>,</span>
+<span id="cb33-2"><a href="analysis.html#cb33-2"></a>             <span class="dt">k.max =</span> <span class="dv">50</span>) <span class="op">+</span></span>
+<span id="cb33-3"><a href="analysis.html#cb33-3"></a><span class="st">  </span><span class="kw">tx_def</span>() <span class="op">+</span></span>
+<span id="cb33-4"><a href="analysis.html#cb33-4"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.text =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">5</span>))</span></code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-26-1.svg" width="672" /></p>
+<p>The silhouette approach chooses k based on an assessment of how similar is a point
+is to its own cluster compared to other clusters. This at least gives us a reasonable
+answer, but everything is pointing towards it not really providing much in terms
+of insights (particularly since it is only suggesting two clusters).</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="analysis.html#cb34-1"></a><span class="kw">fviz_nbclust</span>(golfer.pca<span class="op">$</span>x[,<span class="dv">1</span><span class="op">:</span><span class="dv">30</span>], kmeans, <span class="dt">method =</span> <span class="st">&quot;silhouette&quot;</span>) <span class="op">+</span></span>
+<span id="cb34-2"><a href="analysis.html#cb34-2"></a><span class="st">  </span><span class="kw">tx_def</span>()</span></code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-27-1.svg" width="672" /></p>
+<p>As expected, there isn’t really any interesting about these at all. Cluster one
+selected better performing golfers slightly more often than cluster two but otherwise
+this mostly looks like noise. When this is combined with the correlation plot and
+the finding that the winner didn’t necessarily make a special selection of players
+compared to overall averages this would also suggest there weren’t really groups
+of players who were selected together either. Did anyone really know what they
+were doing?</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="analysis.html#cb35-1"></a>golfer.km &lt;-<span class="st"> </span><span class="kw">kmeans</span>(golfer.pca<span class="op">$</span>x[,<span class="dv">1</span><span class="op">:</span><span class="dv">30</span>], <span class="dv">2</span>)</span>
+<span id="cb35-2"><a href="analysis.html#cb35-2"></a></span>
+<span id="cb35-3"><a href="analysis.html#cb35-3"></a>wide_dat<span class="op">$</span>cluster &lt;-<span class="st"> </span>golfer.km<span class="op">$</span>cluster</span>
+<span id="cb35-4"><a href="analysis.html#cb35-4"></a></span>
+<span id="cb35-5"><a href="analysis.html#cb35-5"></a></span>
+<span id="cb35-6"><a href="analysis.html#cb35-6"></a></span>
+<span id="cb35-7"><a href="analysis.html#cb35-7"></a>wide_dat <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="op">-</span>alt_name) <span class="op">%&gt;%</span></span>
+<span id="cb35-8"><a href="analysis.html#cb35-8"></a><span class="st">  </span><span class="kw">gather</span>(key, val, <span class="op">-</span><span class="st"> </span>cluster) <span class="op">%&gt;%</span></span>
+<span id="cb35-9"><a href="analysis.html#cb35-9"></a><span class="st">  </span><span class="kw">filter</span>(val <span class="op">==</span><span class="st"> </span><span class="dv">1</span>) <span class="op">%&gt;%</span></span>
+<span id="cb35-10"><a href="analysis.html#cb35-10"></a><span class="st">  </span><span class="kw">group_by</span>(cluster,key) <span class="op">%&gt;%</span></span>
+<span id="cb35-11"><a href="analysis.html#cb35-11"></a><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">count =</span> <span class="kw">n</span>()) <span class="op">%&gt;%</span></span>
+<span id="cb35-12"><a href="analysis.html#cb35-12"></a><span class="st">  </span><span class="kw">group_by</span>(cluster) <span class="op">%&gt;%</span></span>
+<span id="cb35-13"><a href="analysis.html#cb35-13"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">perc =</span> (count <span class="op">/</span><span class="st"> </span><span class="kw">sum</span>(count) <span class="op">*</span><span class="st"> </span><span class="dv">100</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb35-14"><a href="analysis.html#cb35-14"></a><span class="st">  </span><span class="kw">left_join</span>(score_dat <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(player, r4_rank), <span class="dt">by =</span> <span class="kw">c</span>(<span class="st">&quot;key&quot;</span> =<span class="st"> &quot;player&quot;</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb35-15"><a href="analysis.html#cb35-15"></a><span class="st">  </span><span class="kw">ungroup</span>() <span class="op">%&gt;%</span></span>
+<span id="cb35-16"><a href="analysis.html#cb35-16"></a><span class="st">  </span><span class="kw">arrange</span>(r4_rank) <span class="op">%&gt;%</span></span>
+<span id="cb35-17"><a href="analysis.html#cb35-17"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">key =</span> forcats<span class="op">::</span><span class="kw">as_factor</span>(key)) <span class="op">%&gt;%</span></span>
+<span id="cb35-18"><a href="analysis.html#cb35-18"></a><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> key, <span class="dt">y =</span> perc)) <span class="op">+</span></span>
+<span id="cb35-19"><a href="analysis.html#cb35-19"></a><span class="st">  </span><span class="kw">geom_col</span>(<span class="dt">stat =</span> <span class="st">&quot;identity&quot;</span>) <span class="op">+</span></span>
+<span id="cb35-20"><a href="analysis.html#cb35-20"></a><span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span><span class="st"> </span>cluster) <span class="op">+</span></span>
+<span id="cb35-21"><a href="analysis.html#cb35-21"></a><span class="st">  </span><span class="kw">tx_def</span>() <span class="op">+</span></span>
+<span id="cb35-22"><a href="analysis.html#cb35-22"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.text.x =</span> <span class="kw">element_text</span>(<span class="dt">size =</span> <span class="dv">3</span>, <span class="dt">angle =</span> <span class="dv">90</span>, <span class="dt">vjust =</span> <span class="fl">0.5</span>))</span></code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-28-1.svg" width="672" /></p>
+<p>Group one had slightly lower scores and slightly higher SD on average.</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="analysis.html#cb36-1"></a>final_scores <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">left_join</span>(wide_dat <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(alt_name, cluster)) <span class="op">%&gt;%</span></span>
+<span id="cb36-2"><a href="analysis.html#cb36-2"></a><span class="st">  </span><span class="kw">group_by</span>(cluster) <span class="op">%&gt;%</span></span>
+<span id="cb36-3"><a href="analysis.html#cb36-3"></a><span class="st">  </span><span class="kw">summarize</span>(<span class="dt">m =</span> <span class="kw">mean</span>(score_<span class="dv">4</span>),</span>
+<span id="cb36-4"><a href="analysis.html#cb36-4"></a>            <span class="dt">sd =</span> <span class="kw">sd</span>(score_<span class="dv">4</span>))</span></code></pre></div>
+<pre><code>## # A tibble: 2 x 3
+##   cluster     m    sd
+##     &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1       1  277.  65.8
+## 2       2  248.  54.1</code></pre>
+<p>Perhaps a simpler way to look at this is just to count the number of times any
+player is selected in the top 10, top 20, top 30, etc.</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="analysis.html#cb38-1"></a>by_ten &lt;-<span class="st"> </span>wide_dat <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="op">-</span>cluster) <span class="op">%&gt;%</span></span>
+<span id="cb38-2"><a href="analysis.html#cb38-2"></a><span class="st">  </span><span class="kw">gather</span>(key, val, <span class="op">-</span>alt_name) <span class="op">%&gt;%</span></span>
+<span id="cb38-3"><a href="analysis.html#cb38-3"></a><span class="st">  </span><span class="kw">left_join</span>(final_scores <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(alt_name, score_<span class="dv">4</span>) <span class="op">%&gt;%</span></span>
+<span id="cb38-4"><a href="analysis.html#cb38-4"></a><span class="st">              </span><span class="kw">arrange</span>(score_<span class="dv">4</span>) <span class="op">%&gt;%</span></span>
+<span id="cb38-5"><a href="analysis.html#cb38-5"></a><span class="st">              </span><span class="kw">mutate</span>(<span class="dt">rank =</span> <span class="dv">1</span><span class="op">:</span><span class="kw">n</span>()) <span class="op">%&gt;%</span></span>
+<span id="cb38-6"><a href="analysis.html#cb38-6"></a><span class="st">              </span><span class="kw">group_by</span>(score_<span class="dv">4</span>) <span class="op">%&gt;%</span></span>
+<span id="cb38-7"><a href="analysis.html#cb38-7"></a><span class="st">              </span><span class="kw">mutate</span>(<span class="dt">rank =</span> <span class="kw">min</span>(rank))) <span class="op">%&gt;%</span></span>
+<span id="cb38-8"><a href="analysis.html#cb38-8"></a><span class="st">  </span><span class="kw">filter</span>(val <span class="op">==</span><span class="st"> </span><span class="dv">1</span>) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb38-9"><a href="analysis.html#cb38-9"></a><span class="st">  </span><span class="kw">arrange</span>(score_<span class="dv">4</span>) <span class="op">%&gt;%</span></span>
+<span id="cb38-10"><a href="analysis.html#cb38-10"></a><span class="st">  </span><span class="kw">group_by</span>(alt_name) <span class="op">%&gt;%</span></span>
+<span id="cb38-11"><a href="analysis.html#cb38-11"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">group =</span> <span class="kw">case_when</span>(rank <span class="op">&lt;=</span><span class="st"> </span><span class="dv">10</span> <span class="op">~</span><span class="st"> &quot;Top 10&quot;</span>,</span>
+<span id="cb38-12"><a href="analysis.html#cb38-12"></a>                           rank <span class="op">&lt;=</span><span class="st"> </span><span class="dv">20</span> <span class="op">~</span><span class="st"> &quot;11-20&quot;</span>,</span>
+<span id="cb38-13"><a href="analysis.html#cb38-13"></a>                           rank <span class="op">&lt;=</span><span class="st"> </span><span class="dv">30</span> <span class="op">~</span><span class="st"> &quot;21-30&quot;</span>,</span>
+<span id="cb38-14"><a href="analysis.html#cb38-14"></a>                           rank <span class="op">&lt;=</span><span class="st"> </span><span class="dv">40</span> <span class="op">~</span><span class="st"> &quot;31-40&quot;</span>,</span>
+<span id="cb38-15"><a href="analysis.html#cb38-15"></a>                           rank <span class="op">&lt;=</span><span class="st"> </span><span class="dv">50</span> <span class="op">~</span><span class="st"> &quot;41-50&quot;</span>,</span>
+<span id="cb38-16"><a href="analysis.html#cb38-16"></a>                           <span class="ot">TRUE</span> <span class="op">~</span><span class="st"> &quot;&gt;50&quot;</span>))</span>
+<span id="cb38-17"><a href="analysis.html#cb38-17"></a>  </span>
+<span id="cb38-18"><a href="analysis.html#cb38-18"></a>by_ten <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(group) <span class="op">%&gt;%</span></span>
+<span id="cb38-19"><a href="analysis.html#cb38-19"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">num_g =</span> <span class="kw">length</span>(<span class="kw">unique</span>(alt_name))) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb38-20"><a href="analysis.html#cb38-20"></a><span class="st">  </span><span class="kw">group_by</span>(group,key) <span class="op">%&gt;%</span></span>
+<span id="cb38-21"><a href="analysis.html#cb38-21"></a><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">count =</span> <span class="kw">n</span>(), <span class="dt">num_g =</span> <span class="kw">unique</span>(num_g)) <span class="op">%&gt;%</span></span>
+<span id="cb38-22"><a href="analysis.html#cb38-22"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">perc =</span> (count <span class="op">/</span><span class="st"> </span>num_g)<span class="op">*</span><span class="dv">100</span>) <span class="op">%&gt;%</span></span>
+<span id="cb38-23"><a href="analysis.html#cb38-23"></a><span class="st">  </span><span class="kw">left_join</span>(score_dat <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(player, r4_rank), <span class="dt">by =</span> <span class="kw">c</span>(<span class="st">&quot;key&quot;</span> =<span class="st"> &quot;player&quot;</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb38-24"><a href="analysis.html#cb38-24"></a><span class="st">  </span><span class="kw">arrange</span>(r4_rank) <span class="op">%&gt;%</span></span>
+<span id="cb38-25"><a href="analysis.html#cb38-25"></a><span class="st">  </span><span class="kw">left_join</span>(group_dict <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">rename</span>(<span class="dt">selected =</span> group, <span class="dt">key =</span> player)) <span class="op">%&gt;%</span></span>
+<span id="cb38-26"><a href="analysis.html#cb38-26"></a><span class="st">  </span></span>
+<span id="cb38-27"><a href="analysis.html#cb38-27"></a><span class="st">  </span><span class="kw">mutate</span>( </span>
+<span id="cb38-28"><a href="analysis.html#cb38-28"></a>    <span class="dt">key =</span> glue<span class="op">::</span><span class="kw">glue</span>(<span class="st">&quot;{key} ({r4_rank})&quot;</span>),</span>
+<span id="cb38-29"><a href="analysis.html#cb38-29"></a>    <span class="dt">key =</span> forcats<span class="op">::</span><span class="kw">as_factor</span>(key)) <span class="op">%&gt;%</span></span>
+<span id="cb38-30"><a href="analysis.html#cb38-30"></a><span class="st">    </span><span class="kw">filter</span>(group <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Top 10&quot;</span>, <span class="st">&quot;11-20&quot;</span>, <span class="st">&quot;21-30&quot;</span>)) <span class="op">%&gt;%</span></span>
+<span id="cb38-31"><a href="analysis.html#cb38-31"></a><span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> key, <span class="dt">y =</span> perc, <span class="dt">colour =</span> group)) <span class="op">+</span></span>
+<span id="cb38-32"><a href="analysis.html#cb38-32"></a><span class="st">  </span><span class="kw">geom_point</span>() <span class="op">+</span></span>
+<span id="cb38-33"><a href="analysis.html#cb38-33"></a><span class="st">  </span><span class="kw">coord_flip</span>() <span class="op">+</span></span>
+<span id="cb38-34"><a href="analysis.html#cb38-34"></a><span class="st">  </span><span class="kw">facet_grid</span>( selected <span class="op">~</span><span class="st"> </span>group, <span class="dt">scales =</span> <span class="st">&quot;free&quot;</span>, <span class="dt">space =</span> <span class="st">&quot;free&quot;</span>)</span></code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-30-1.svg" width="672" /></p>
+<div id="growth-mixture-model" class="section level3">
+<h3><span class="header-section-number">4.1.1</span> Growth Mixture Model</h3>
+<p>Another way we could look at this would be to leverage what seemed like potentially
+more promising data in terms of patterns of results, and maybe there are smaller
+groups of players that are shared in those? We can accomplish this analysis using
+a growth mixture model, which creates groups of players with similar trajectories.
+If we were doing this for a real project</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="analysis.html#cb39-1"></a>gmm_dat &lt;-<span class="st"> </span>final_scores <span class="op">%&gt;%</span></span>
+<span id="cb39-2"><a href="analysis.html#cb39-2"></a><span class="st">  </span><span class="kw">gather</span>(<span class="st">&quot;key&quot;</span>, <span class="st">&quot;value&quot;</span>, <span class="op">-</span><span class="kw">c</span>(alt_name)) <span class="op">%&gt;%</span></span>
+<span id="cb39-3"><a href="analysis.html#cb39-3"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">key =</span> <span class="kw">factor</span>(key, <span class="dt">labels =</span> <span class="kw">c</span>(<span class="st">&quot;Day 1&quot;</span>, <span class="st">&quot;Day 2&quot;</span>, <span class="st">&quot;Day 3&quot;</span>, <span class="st">&quot;Day 4&quot;</span>))) <span class="op">%&gt;%</span></span>
+<span id="cb39-4"><a href="analysis.html#cb39-4"></a><span class="st">  </span><span class="kw">group_by</span>(key) <span class="op">%&gt;%</span></span>
+<span id="cb39-5"><a href="analysis.html#cb39-5"></a><span class="st">  </span><span class="kw">arrange</span>(key, value) <span class="op">%&gt;%</span></span>
+<span id="cb39-6"><a href="analysis.html#cb39-6"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">pos =</span> <span class="dv">1</span><span class="op">:</span><span class="kw">n</span>()) <span class="op">%&gt;%</span></span>
+<span id="cb39-7"><a href="analysis.html#cb39-7"></a><span class="st">  </span><span class="kw">group_by</span>(key, value) <span class="op">%&gt;%</span></span>
+<span id="cb39-8"><a href="analysis.html#cb39-8"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">pos =</span> <span class="kw">min</span>(pos)) <span class="op">%&gt;%</span></span>
+<span id="cb39-9"><a href="analysis.html#cb39-9"></a><span class="st">  </span>ungroup <span class="op">%&gt;%</span></span>
+<span id="cb39-10"><a href="analysis.html#cb39-10"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">ID =</span> <span class="kw">as.numeric</span>(<span class="kw">as.factor</span>(alt_name)),</span>
+<span id="cb39-11"><a href="analysis.html#cb39-11"></a>         <span class="dt">time =</span> <span class="kw">as.numeric</span>(key))</span>
+<span id="cb39-12"><a href="analysis.html#cb39-12"></a></span>
+<span id="cb39-13"><a href="analysis.html#cb39-13"></a></span>
+<span id="cb39-14"><a href="analysis.html#cb39-14"></a></span>
+<span id="cb39-15"><a href="analysis.html#cb39-15"></a>lcmm1 &lt;-<span class="st"> </span><span class="kw">lcmm</span>(pos <span class="op">~</span><span class="st"> </span>time, <span class="dt">subject =</span> <span class="st">&quot;ID&quot;</span>,</span>
+<span id="cb39-16"><a href="analysis.html#cb39-16"></a>              <span class="dt">mixture =</span> <span class="op">~</span><span class="st"> </span>time,</span>
+<span id="cb39-17"><a href="analysis.html#cb39-17"></a>              <span class="dt">random =</span> <span class="op">~</span><span class="st"> </span>time,</span>
+<span id="cb39-18"><a href="analysis.html#cb39-18"></a>              <span class="dt">ng =</span> <span class="dv">4</span>,</span>
+<span id="cb39-19"><a href="analysis.html#cb39-19"></a>              <span class="dt">data =</span> <span class="kw">as.data.frame</span>(gmm_dat))</span></code></pre></div>
+<pre><code>## Be patient, lcmm is running ... 
+## The program took 28.19 seconds</code></pre>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="analysis.html#cb41-1"></a>preds &lt;-<span class="st"> </span><span class="kw">predictY</span>(lcmm1, <span class="dt">newdata =</span> <span class="kw">data.frame</span>(<span class="dt">time =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)),</span>
+<span id="cb41-2"><a href="analysis.html#cb41-2"></a>                  <span class="dt">draws =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb41-3"><a href="analysis.html#cb41-3"></a></span>
+<span id="cb41-4"><a href="analysis.html#cb41-4"></a></span>
+<span id="cb41-5"><a href="analysis.html#cb41-5"></a></span>
+<span id="cb41-6"><a href="analysis.html#cb41-6"></a>gp_dat &lt;-<span class="st"> </span>gmm_dat <span class="op">%&gt;%</span></span>
+<span id="cb41-7"><a href="analysis.html#cb41-7"></a><span class="st">  </span><span class="kw">left_join</span>( lcmm1<span class="op">$</span>pprob <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(ID, class))</span>
+<span id="cb41-8"><a href="analysis.html#cb41-8"></a>  </span>
+<span id="cb41-9"><a href="analysis.html#cb41-9"></a></span>
+<span id="cb41-10"><a href="analysis.html#cb41-10"></a>class_data &lt;-<span class="st"> </span>preds<span class="op">$</span>pred <span class="op">%&gt;%</span><span class="st"> </span>as.data.frame <span class="op">%&gt;%</span></span>
+<span id="cb41-11"><a href="analysis.html#cb41-11"></a><span class="st">  </span>gather <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb41-12"><a href="analysis.html#cb41-12"></a><span class="st">  </span><span class="kw">separate</span>(key, <span class="kw">c</span>(<span class="st">&quot;dis&quot;</span>, <span class="st">&quot;int&quot;</span>, <span class="st">&quot;class&quot;</span>), <span class="st">&quot;_&quot;</span>) <span class="op">%&gt;%</span></span>
+<span id="cb41-13"><a href="analysis.html#cb41-13"></a><span class="st">  </span><span class="kw">group_by</span>(int, class) <span class="op">%&gt;%</span></span>
+<span id="cb41-14"><a href="analysis.html#cb41-14"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">day =</span> <span class="kw">paste</span>(<span class="st">&quot;Day&quot;</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>),</span>
+<span id="cb41-15"><a href="analysis.html#cb41-15"></a>         <span class="dt">class =</span> forcats<span class="op">::</span><span class="kw">as_factor</span>(class),</span>
+<span id="cb41-16"><a href="analysis.html#cb41-16"></a>         <span class="dt">class =</span> <span class="kw">as.numeric</span>(class)) <span class="op">%&gt;%</span></span>
+<span id="cb41-17"><a href="analysis.html#cb41-17"></a><span class="st">  </span><span class="kw">spread</span>(int, value)</span>
+<span id="cb41-18"><a href="analysis.html#cb41-18"></a></span>
+<span id="cb41-19"><a href="analysis.html#cb41-19"></a></span>
+<span id="cb41-20"><a href="analysis.html#cb41-20"></a>gp_dat <span class="op">%&gt;%</span></span>
+<span id="cb41-21"><a href="analysis.html#cb41-21"></a><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> key, <span class="dt">y =</span> pos, <span class="dt">group =</span> alt_name, <span class="dt">colour =</span> <span class="kw">factor</span>(class))) <span class="op">+</span></span>
+<span id="cb41-22"><a href="analysis.html#cb41-22"></a><span class="st">  </span><span class="kw">geom_line</span>(<span class="dt">alpha =</span> <span class="fl">0.2</span>, <span class="dt">size =</span> <span class="fl">0.3</span>) <span class="op">+</span></span>
+<span id="cb41-23"><a href="analysis.html#cb41-23"></a><span class="st">  </span><span class="kw">scale_y_reverse</span>() <span class="op">+</span></span>
+<span id="cb41-24"><a href="analysis.html#cb41-24"></a><span class="st">  </span><span class="kw">geom_line</span>(<span class="dt">data =</span> class_data, <span class="dt">inherit.aes =</span> <span class="ot">FALSE</span>,</span>
+<span id="cb41-25"><a href="analysis.html#cb41-25"></a>            <span class="dt">size =</span> <span class="dv">1</span>,</span>
+<span id="cb41-26"><a href="analysis.html#cb41-26"></a>            <span class="kw">aes</span>(<span class="dt">x =</span> day, <span class="dt">y =</span> <span class="st">`</span><span class="dt">50</span><span class="st">`</span>,<span class="dt">group =</span> class, <span class="dt">colour =</span> <span class="kw">factor</span>(class))) <span class="op">+</span></span>
+<span id="cb41-27"><a href="analysis.html#cb41-27"></a><span class="st">  </span><span class="kw">scale_color_manual</span>(<span class="dt">values =</span> plot_cols[<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>], <span class="dt">name =</span> <span class="st">&quot;Profile&quot;</span>,</span>
+<span id="cb41-28"><a href="analysis.html#cb41-28"></a>                     <span class="dt">breaks =</span> <span class="kw">c</span>(<span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">2</span>),</span>
+<span id="cb41-29"><a href="analysis.html#cb41-29"></a>                     <span class="dt">labels =</span> <span class="kw">c</span>(<span class="st">&quot;Strong Performers&quot;</span>,</span>
+<span id="cb41-30"><a href="analysis.html#cb41-30"></a>                                <span class="st">&quot;Improvers&quot;</span>, </span>
+<span id="cb41-31"><a href="analysis.html#cb41-31"></a>                                <span class="st">&quot;Decliners&quot;</span>,</span>
+<span id="cb41-32"><a href="analysis.html#cb41-32"></a>                                <span class="st">&quot;Poor Performers&quot;</span></span>
+<span id="cb41-33"><a href="analysis.html#cb41-33"></a>                                )) <span class="op">+</span></span>
+<span id="cb41-34"><a href="analysis.html#cb41-34"></a><span class="st">  </span><span class="kw">labs</span>(<span class="dt">y =</span> <span class="st">&quot;Player Position&quot;</span>,</span>
+<span id="cb41-35"><a href="analysis.html#cb41-35"></a>       <span class="dt">x =</span> <span class="st">&quot;Day of Tournament&quot;</span>,</span>
+<span id="cb41-36"><a href="analysis.html#cb41-36"></a>       <span class="dt">title =</span> <span class="st">&quot;Performance by Player Profile&quot;</span>) <span class="op">+</span></span>
+<span id="cb41-37"><a href="analysis.html#cb41-37"></a><span class="st">  </span><span class="kw">tx_def</span>()</span></code></pre></div>
+<p><img src="_main_files/figure-html/unnamed-chunk-31-1.svg" width="672" /></p>
+<p>The latent class model discovered trajectories that line up with what we might
+have expected from visual exploration. These profiles help us to see that if
+you were going to threaten to be in the money then you generally (but not always)
+start high in the leaderboard. Players in the middle could have modest improvement
+or worsening, and those near the bottom tended to perform poorly throughout. This
+was meant as a quick sandbox for playing with some tools so I haven’t done a lot
+of background but I was able to quickly pull some pre-masters player ranks that
+might provide some insights.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="analysis.html#cb42-1"></a><span class="kw">data</span>(<span class="st">&quot;p_rank&quot;</span>)</span>
+<span id="cb42-2"><a href="analysis.html#cb42-2"></a></span>
+<span id="cb42-3"><a href="analysis.html#cb42-3"></a>                     </span>
+<span id="cb42-4"><a href="analysis.html#cb42-4"></a></span>
+<span id="cb42-5"><a href="analysis.html#cb42-5"></a></span>
+<span id="cb42-6"><a href="analysis.html#cb42-6"></a>class_sels &lt;-<span class="st"> </span>wide_dat <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="op">-</span>cluster) <span class="op">%&gt;%</span></span>
+<span id="cb42-7"><a href="analysis.html#cb42-7"></a><span class="st">  </span><span class="kw">gather</span>(Golfer, val, <span class="op">-</span>alt_name) <span class="op">%&gt;%</span></span>
+<span id="cb42-8"><a href="analysis.html#cb42-8"></a><span class="st">  </span><span class="kw">filter</span>(val <span class="op">==</span><span class="st"> </span><span class="dv">1</span>) <span class="op">%&gt;%</span></span>
+<span id="cb42-9"><a href="analysis.html#cb42-9"></a><span class="st">  </span><span class="kw">left_join</span>(p_rank) <span class="op">%&gt;%</span></span>
+<span id="cb42-10"><a href="analysis.html#cb42-10"></a><span class="st">  </span><span class="kw">left_join</span>(gp_dat <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(alt_name, class)) <span class="op">%&gt;%</span></span>
+<span id="cb42-11"><a href="analysis.html#cb42-11"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">class =</span> <span class="kw">factor</span>(class, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">2</span>), </span>
+<span id="cb42-12"><a href="analysis.html#cb42-12"></a>                        <span class="dt">labels =</span> <span class="kw">c</span>(<span class="st">&quot;Strong Performers&quot;</span>,</span>
+<span id="cb42-13"><a href="analysis.html#cb42-13"></a>                                <span class="st">&quot;Improvers&quot;</span>, </span>
+<span id="cb42-14"><a href="analysis.html#cb42-14"></a>                                <span class="st">&quot;Decliners&quot;</span>,</span>
+<span id="cb42-15"><a href="analysis.html#cb42-15"></a>                                <span class="st">&quot;Poor Performers&quot;</span></span>
+<span id="cb42-16"><a href="analysis.html#cb42-16"></a>                                )))</span>
+<span id="cb42-17"><a href="analysis.html#cb42-17"></a></span>
+<span id="cb42-18"><a href="analysis.html#cb42-18"></a>class_sels <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb42-19"><a href="analysis.html#cb42-19"></a><span class="st">  </span><span class="kw">group_by</span>(alt_name) <span class="op">%&gt;%</span></span>
+<span id="cb42-20"><a href="analysis.html#cb42-20"></a><span class="st">  </span><span class="kw">summarize</span>(<span class="dt">rank =</span> <span class="kw">mean</span>(Rank),</span>
+<span id="cb42-21"><a href="analysis.html#cb42-21"></a>            <span class="dt">wow =</span> <span class="kw">sum</span>(Rank <span class="op">==</span><span class="st"> </span><span class="dv">176</span>),</span>
+<span id="cb42-22"><a href="analysis.html#cb42-22"></a>            <span class="dt">poor =</span> <span class="kw">sum</span>(Rank <span class="op">&gt;</span><span class="st"> </span><span class="dv">100</span>),</span>
+<span id="cb42-23"><a href="analysis.html#cb42-23"></a>            <span class="dt">class =</span> <span class="kw">unique</span>(class)) <span class="op">%&gt;%</span></span>
+<span id="cb42-24"><a href="analysis.html#cb42-24"></a><span class="st">  </span><span class="kw">group_by</span>(class) <span class="op">%&gt;%</span></span>
+<span id="cb42-25"><a href="analysis.html#cb42-25"></a><span class="st">  </span><span class="kw">select</span>(<span class="op">-</span>alt_name) <span class="op">%&gt;%</span></span>
+<span id="cb42-26"><a href="analysis.html#cb42-26"></a><span class="st">    </span>gtsummary<span class="op">::</span><span class="kw">tbl_summary</span>(<span class="dt">by =</span> class,</span>
+<span id="cb42-27"><a href="analysis.html#cb42-27"></a>                           <span class="dt">label =</span> <span class="kw">list</span>(<span class="dt">rank =</span> <span class="st">&quot;Rank&quot;</span>,</span>
+<span id="cb42-28"><a href="analysis.html#cb42-28"></a>                                        <span class="dt">wow =</span> <span class="st">&quot;No. Unranked&quot;</span>,</span>
+<span id="cb42-29"><a href="analysis.html#cb42-29"></a>                                        <span class="dt">poor =</span> <span class="st">&quot;No. Rank &gt; 100&quot;</span>))</span></code></pre></div>
+<div id="qvdgmqxofm" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#qvdgmqxofm .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#qvdgmqxofm .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#qvdgmqxofm .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#qvdgmqxofm .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#qvdgmqxofm .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#qvdgmqxofm .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#qvdgmqxofm .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#qvdgmqxofm .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#qvdgmqxofm .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#qvdgmqxofm .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#qvdgmqxofm .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#qvdgmqxofm .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#qvdgmqxofm .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#qvdgmqxofm .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#qvdgmqxofm .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#qvdgmqxofm .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#qvdgmqxofm .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#qvdgmqxofm .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#qvdgmqxofm .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#qvdgmqxofm .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#qvdgmqxofm .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#qvdgmqxofm .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#qvdgmqxofm .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#qvdgmqxofm .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#qvdgmqxofm .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#qvdgmqxofm .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#qvdgmqxofm .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#qvdgmqxofm .gt_left {
+  text-align: left;
+}
+
+#qvdgmqxofm .gt_center {
+  text-align: center;
+}
+
+#qvdgmqxofm .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#qvdgmqxofm .gt_font_normal {
+  font-weight: normal;
+}
+
+#qvdgmqxofm .gt_font_bold {
+  font-weight: bold;
+}
+
+#qvdgmqxofm .gt_font_italic {
+  font-style: italic;
+}
+
+#qvdgmqxofm .gt_super {
+  font-size: 65%;
+}
+
+#qvdgmqxofm .gt_footnote_marks {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 65%;
+}
+</style>
+<table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1"><strong>Characteristic</strong></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1"><strong>Strong Performers</strong>, N = 83<sup class="gt_footnote_marks">1</sup></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1"><strong>Improvers</strong>, N = 66<sup class="gt_footnote_marks">1</sup></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1"><strong>Decliners</strong>, N = 65<sup class="gt_footnote_marks">1</sup></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1"><strong>Poor Performers</strong>, N = 58<sup class="gt_footnote_marks">1</sup></th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td class="gt_row gt_left">Rank</td>
+<td class="gt_row gt_center">22 (20, 28)</td>
+<td class="gt_row gt_center">28 (24, 36)</td>
+<td class="gt_row gt_center">26 (21, 32)</td>
+<td class="gt_row gt_center">34 (26, 43)</td></tr>
+    <tr><td class="gt_row gt_left">No. Unranked</td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td></tr>
+    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">0</td>
+<td class="gt_row gt_center">81 (98%)</td>
+<td class="gt_row gt_center">59 (89%)</td>
+<td class="gt_row gt_center">61 (94%)</td>
+<td class="gt_row gt_center">44 (76%)</td></tr>
+    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">4</td>
+<td class="gt_row gt_center">2 (2.4%)</td>
+<td class="gt_row gt_center">7 (11%)</td>
+<td class="gt_row gt_center">4 (6.2%)</td>
+<td class="gt_row gt_center">12 (21%)</td></tr>
+    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">8</td>
+<td class="gt_row gt_center">0 (0%)</td>
+<td class="gt_row gt_center">0 (0%)</td>
+<td class="gt_row gt_center">0 (0%)</td>
+<td class="gt_row gt_center">2 (3.4%)</td></tr>
+    <tr><td class="gt_row gt_left">No. Rank &gt; 100</td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td>
+<td class="gt_row gt_center"></td></tr>
+    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">0</td>
+<td class="gt_row gt_center">67 (81%)</td>
+<td class="gt_row gt_center">35 (53%)</td>
+<td class="gt_row gt_center">44 (68%)</td>
+<td class="gt_row gt_center">20 (34%)</td></tr>
+    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">4</td>
+<td class="gt_row gt_center">15 (18%)</td>
+<td class="gt_row gt_center">26 (39%)</td>
+<td class="gt_row gt_center">17 (26%)</td>
+<td class="gt_row gt_center">18 (31%)</td></tr>
+    <tr><td class="gt_row gt_left" style="text-align: left; text-indent: 10px;">8</td>
+<td class="gt_row gt_center">1 (1.2%)</td>
+<td class="gt_row gt_center">5 (7.6%)</td>
+<td class="gt_row gt_center">4 (6.2%)</td>
+<td class="gt_row gt_center">20 (34%)</td></tr>
+  </tbody>
+  
+  <tfoot>
+    <tr class="gt_footnotes">
+      <td colspan="5">
+        <p class="gt_footnote">
+          <sup class="gt_footnote_marks">
+            <em>1</em>
+          </sup>
+           
+          Median (IQR); n (%)
+          <br />
+        </p>
+      </td>
+    </tr>
+  </tfoot>
+</table>
+</div>
+<p>Strong performers chose a group of players that had on average better ranks than
+other groups, while poor performers trended to a higher rank. Improvers and
+decliners have the opposite averages than may be expected but this could be because
+those groups are more heterogeneous than the 4 class model separates. An alternative
+explanation may be that improvers and decliners either differed in terms of
+selecting players the over-performed or simply just that decliners got unlucky.</p>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="initial-data-exploration.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="conclusions.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

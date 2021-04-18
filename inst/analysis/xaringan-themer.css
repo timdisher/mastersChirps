@@ -44,10 +44,10 @@
 
   /* Colors */
   --text-color: #00204B;
-  --header-color: #002F6C;
+  --header-color: #ED8B00;
   --background-color: #FFFFFF;
   --link-color: #ED8B00;
-  --text-bold-color: #ED8B00;
+  --text-bold-color: #002F6C;
   --code-highlight-color: rgba(255,255,0,0.5);
   --inverse-text-color: #FFFFFF;
   --inverse-background-color: #002F6C;
@@ -55,7 +55,7 @@
   --inverse-link-color: #ED8B00;
   --title-slide-background-color: #002F6C;
   --title-slide-text-color: white;
-  --header-background-color: #002F6C;
+  --header-background-color: #ED8B00;
   --header-background-text-color: #FFFFFF;
   --base: #002F6C;
   --white: #FFFFFF;

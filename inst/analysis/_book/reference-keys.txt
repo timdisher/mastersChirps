@@ -1,4 +1,5 @@
 project-information
+ideas-explored
 import-and-clean-data
 selection-data
 leaderboard-data
@@ -7,10 +8,12 @@ initial-data-exploration
 golfer-performance
 pool-performance
 player-choices
+eversana-choices
 player-performance
 overall
-team-highlight
-results-analysis
+analysis
 player-choice-clustering
-example
-examples-from-ryan
+growth-mixture-model
+conclusions
+findings
+next-steps

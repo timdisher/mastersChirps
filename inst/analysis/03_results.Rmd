@@ -3,79 +3,252 @@ output: html_document
 editor_options: 
   chunk_output_type: console
 ---
-# Results Analysis
+# Analysis
 
 ## Player Choice Clustering
 
-
-### Example
-
-A brief set of example code was provided by Ryan based on [this tutorial](https://www.datacamp.com/community/tutorials/pca-analysis-r
-). The analysis is based on the mtcars dataset and provides a very bare bones
-showcase of the `prcomp` function and `ggbiplot`.
-
-First we create the PCA object using `prcomp` limited to continuous variables only.
-This was done because the other variables in mtcars are categorical/ordinal which
-do not work well with PCA without further processing.
-
+First let's see if there's any interesting patterns in player choices. 
 ```{r}
-mtcars.pca <- prcomp(mtcars[,c(1:7,10,11)], center = TRUE, scale. = TRUE)
+golfer.pca <- prcomp(wide_dat[,-1])
 
-summary(mtcars.pca)
+
+summary(golfer.pca)
 
 ```
 
-We can them make a simple plot to show how different variables are related. The
-post goes into some extra details around drawing ellipses etc but we won't get
-into that until the analysis phase if there is something interesting. One
-of the concepts that they showed that was pretty interesting though was how this
-type of plot can help you to identify variables that might be important for
-classification problems. For example all of the american cars cluster tightly
-in one section of the plot, suggesting they would be important in an "American vs
-not American" classification. 
+So unfortunately, as is usually the case, we don't really see great performance
+until we hit the 30th principal component which means the plots for clustering
+aren't all that informative. In an ideal world we'd see the nice situation where
+the first and second components explain a huge chunk of variance. Perhaps this
+shouldn't be too  Let's just jump straight to kmeans on this and see if anything
+interesting comes up. Unfortunately the within sum of square approach is telling
+us we should have something like 40 clusters which is too much to be interesting.
 
-```{r fig.width= 8, fig.height= 8}
-ggbiplot(mtcars.pca,ellipse=TRUE,choices=c(3,4),   labels=rownames(mtcars))
+
+```{r}
+fviz_nbclust(golfer.pca$x[,1:30], kmeans, method = "wss",
+             k.max = 50) +
+  tx_def() +
+  theme(axis.text = element_text(size = 5))
+
 
 ```
 
+The silhouette approach chooses k based on an assessment of how similar is a point
+is to its own cluster compared to other clusters. This at least gives us a reasonable
+answer, but everything is pointing towards it not really providing much in terms
+of insights (particularly since it is only suggesting two clusters).
 
-
-## Examples from Ryan
-
-Ryan made a nice start on some basic line plots that we can build on
-from here.
 ```{r}
-golf_data <- tribble(
-  ~name, ~day, ~pos, ~icon,
-  "T", "1", 104, NA,
-  "C", "1", 102, NA,
-  "I", "1", 145, NA,
-  "J", "1", 164, NA,
-  "R", "1", 170, NA,
-  # Day Two
-  "T", "2", 67, "/home/rbatten/learning-r/masterChirpsRBcalcs/masters-jacket.png",
-  "C", "2", 121, NA,
-  "I", "2", 200, NA,
-  "J", "2", 109, NA,
-  "R", "2", 117, NA
-)
+fviz_nbclust(golfer.pca$x[,1:30], kmeans, method = "silhouette") +
+  tx_def()
 
-ggplot(golf_data,
-       mapping = aes(x = day, y = pos,
-                                group = name)) +
-  scale_y_reverse() +
-  geom_line(aes(color = name)) +
+```
+
+As expected, there isn't really any interesting about these at all. Cluster one
+selected better performing golfers slightly more often than cluster two but otherwise
+this mostly looks like noise. When this is combined with the correlation plot and
+the finding that the winner didn't necessarily make a special selection of players
+compared to overall averages this would also suggest there weren't really groups
+of players who were selected together either. Did anyone really know what they
+were doing? 
+
+```{r}
+golfer.km <- kmeans(golfer.pca$x[,1:30], 2)
+
+wide_dat$cluster <- golfer.km$cluster
+
+
+
+wide_dat %>% select(-alt_name) %>%
+  gather(key, val, - cluster) %>%
+  filter(val == 1) %>%
+  group_by(cluster,key) %>%
+  summarise(count = n()) %>%
+  group_by(cluster) %>%
+  mutate(perc = (count / sum(count) * 100)) %>%
+  left_join(score_dat %>% select(player, r4_rank), by = c("key" = "player")) %>%
+  ungroup() %>%
+  arrange(r4_rank) %>%
+  mutate(key = forcats::as_factor(key)) %>%
+  ggplot(aes(x = key, y = perc)) +
+  geom_col(stat = "identity") +
+  facet_wrap(~ cluster) +
+  tx_def() +
+  theme(axis.text.x = element_text(size = 3, angle = 90, vjust = 0.5))
+
+```
+
+Group one had slightly lower scores and slightly higher SD on average.
+
+```{r}
+final_scores %>% left_join(wide_dat %>% select(alt_name, cluster)) %>%
+  group_by(cluster) %>%
+  summarize(m = mean(score_4),
+            sd = sd(score_4))
+```
+
+Perhaps a simpler way to look at this is just to count the number of times any
+player is selected in the top 10, top 20, top 30, etc.
+
+```{r}
+by_ten <- wide_dat %>% select(-cluster) %>%
+  gather(key, val, -alt_name) %>%
+  left_join(final_scores %>% select(alt_name, score_4) %>%
+              arrange(score_4) %>%
+              mutate(rank = 1:n()) %>%
+              group_by(score_4) %>%
+              mutate(rank = min(rank))) %>%
+  filter(val == 1) %>% 
+  arrange(score_4) %>%
+  group_by(alt_name) %>%
+  mutate(group = case_when(rank <= 10 ~ "Top 10",
+                           rank <= 20 ~ "11-20",
+                           rank <= 30 ~ "21-30",
+                           rank <= 40 ~ "31-40",
+                           rank <= 50 ~ "41-50",
+                           TRUE ~ ">50"))
+  
+by_ten %>% group_by(group) %>%
+  mutate(num_g = length(unique(alt_name))) %>% 
+  group_by(group,key) %>%
+  summarise(count = n(), num_g = unique(num_g)) %>%
+  mutate(perc = (count / num_g)*100) %>%
+  left_join(score_dat %>% select(player, r4_rank), by = c("key" = "player")) %>%
+  arrange(r4_rank) %>%
+  left_join(group_dict %>% rename(selected = group, key = player)) %>%
+  
+  mutate( 
+    key = glue::glue("{key} ({r4_rank})"),
+    key = forcats::as_factor(key)) %>%
+    filter(group %in% c("Top 10", "11-20", "21-30")) %>%
+    ggplot(aes(x = key, y = perc, colour = group)) +
   geom_point() +
-  theme_minimal() +
-  ggtitle("Master's Pool Results") +
-  scale_color_manual(values = c("T" = "#006B54", "C" = "#DC4605",
-                                "I" = "#007298", "J" = "#ED8B00",
-                                "R" = "#002F6C")) +
-  geom_image(aes(image = icon), size = 0.05)
+  coord_flip() +
+  facet_grid( selected ~ group, scales = "free", space = "free")
+  
+```
+
+### Growth Mixture Model
+
+Another way we could look at this would be to leverage what seemed like potentially
+more promising data in terms of patterns of results, and maybe there are smaller
+groups of players that are shared in those? We can accomplish this analysis using
+a growth mixture model, which creates groups of players with similar trajectories.
+If we were doing this for a real project 
+
+
+```{r}
+
+gmm_dat <- final_scores %>%
+  gather("key", "value", -c(alt_name)) %>%
+  mutate(key = factor(key, labels = c("Day 1", "Day 2", "Day 3", "Day 4"))) %>%
+  group_by(key) %>%
+  arrange(key, value) %>%
+  mutate(pos = 1:n()) %>%
+  group_by(key, value) %>%
+  mutate(pos = min(pos)) %>%
+  ungroup %>%
+  mutate(ID = as.numeric(as.factor(alt_name)),
+         time = as.numeric(key))
+
+
+
+lcmm1 <- lcmm(pos ~ time, subject = "ID",
+              mixture = ~ time,
+              random = ~ time,
+              ng = 4,
+              data = as.data.frame(gmm_dat))
+
+preds <- predictY(lcmm1, newdata = data.frame(time = c(1, 2, 3, 4)),
+                  draws = TRUE)
+
+
+
+gp_dat <- gmm_dat %>%
+  left_join( lcmm1$pprob %>% select(ID, class))
+  
+
+class_data <- preds$pred %>% as.data.frame %>%
+  gather %>% 
+  separate(key, c("dis", "int", "class"), "_") %>%
+  group_by(int, class) %>%
+  mutate(day = paste("Day", 1:4),
+         class = forcats::as_factor(class),
+         class = as.numeric(class)) %>%
+  spread(int, value)
+
+
+gp_dat %>%
+  ggplot(aes(x = key, y = pos, group = alt_name, colour = factor(class))) +
+  geom_line(alpha = 0.2, size = 0.3) +
+  scale_y_reverse() +
+  geom_line(data = class_data, inherit.aes = FALSE,
+            size = 1,
+            aes(x = day, y = `50`,group = class, colour = factor(class))) +
+  scale_color_manual(values = plot_cols[1:4], name = "Profile",
+                     breaks = c(3, 1, 4, 2),
+                     labels = c("Strong Performers",
+                                "Improvers", 
+                                "Decliners",
+                                "Poor Performers"
+                                )) +
+  labs(y = "Player Position",
+       x = "Day of Tournament",
+       title = "Performance by Player Profile") +
+  tx_def()
+  
+  
+  
 
 ```
 
+The latent class model discovered trajectories that line up with what we might
+have expected from visual exploration. These profiles help us to see that if
+you were going to threaten to be in the money then you generally (but not always)
+start high in the leaderboard. Players in the middle could have modest improvement
+or worsening, and those near the bottom tended to perform poorly throughout. This
+was meant as a quick sandbox for playing with some tools so I haven't done a lot
+of background but I was able to quickly pull some pre-masters player ranks that
+might provide some insights.
+
+```{r}
+data("p_rank")
 
 
+                     
 
+
+class_sels <- wide_dat %>% select(-cluster) %>%
+  gather(Golfer, val, -alt_name) %>%
+  filter(val == 1) %>%
+  left_join(p_rank) %>%
+  left_join(gp_dat %>% select(alt_name, class)) %>%
+  mutate(class = factor(class, levels = c(3, 1, 4, 2), 
+                        labels = c("Strong Performers",
+                                "Improvers", 
+                                "Decliners",
+                                "Poor Performers"
+                                )))
+
+class_sels %>% 
+  group_by(alt_name) %>%
+  summarize(rank = mean(Rank),
+            wow = sum(Rank == 176),
+            poor = sum(Rank > 100),
+            class = unique(class)) %>%
+  group_by(class) %>%
+  select(-alt_name) %>%
+    gtsummary::tbl_summary(by = class,
+                           label = list(rank = "Rank",
+                                        wow = "No. Unranked",
+                                        poor = "No. Rank > 100"))
+  
+```
+
+Strong performers chose a group of players that had on average better ranks than
+other groups, while poor performers trended to a higher rank. Improvers and
+decliners have the opposite averages than may be expected but this could be because
+those groups are more heterogeneous than the 4 class model separates. An alternative
+explanation may be that improvers and decliners either differed in terms of 
+selecting players the over-performed or simply just that decliners got unlucky.
