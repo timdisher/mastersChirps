@@ -56,7 +56,11 @@ were doing?
 ```{r}
 golfer.km <- kmeans(golfer.pca$x[,1:30], 2)
 
-wide_dat$cluster <- golfer.km$cluster
+wide_dat$cluster <-  golfer.km$cluster
+
+cache_rds({
+  wide_dat
+}, file = "wide_dat", dir = cache_dir) 
 
 
 
@@ -165,18 +169,19 @@ preds <- predictY(lcmm1, newdata = data.frame(time = c(1, 2, 3, 4)),
 
 
 
-gp_dat <- gmm_dat %>%
-  left_join( lcmm1$pprob %>% select(ID, class))
-  
+gp_dat <- cache_rds({gmm_dat %>%
+  left_join( lcmm1$pprob %>% select(ID, class))},
+  file = "gp_dat", dir = cache_dir
+  ) 
 
-class_data <- preds$pred %>% as.data.frame %>%
+class_data <- cache_rds( {preds$pred %>% as.data.frame %>%
   gather %>% 
   separate(key, c("dis", "int", "class"), "_") %>%
   group_by(int, class) %>%
   mutate(day = paste("Day", 1:4),
          class = forcats::as_factor(class),
          class = as.numeric(class)) %>%
-  spread(int, value)
+  spread(int, value)}, file = "class_data", dir = cache_dir)
 
 
 gp_dat %>%
@@ -240,9 +245,16 @@ class_sels %>%
   group_by(class) %>%
   select(-alt_name) %>%
     gtsummary::tbl_summary(by = class,
+                           statistic = vars(rank,wow,poor) ~ c("{N_nonmiss}",
+                                     "{median} ({p25}, {p75})", 
+                                     "{mean}"),
+                           type = list(rank ~ 'continuous2',
+                                       wow ~ 'continuous2',
+                                       poor ~ 'continuous2'),
                            label = list(rank = "Rank",
                                         wow = "No. Unranked",
-                                        poor = "No. Rank > 100"))
+                                        poor = "No. Rank > 100"),
+                           digits = list(c(rank, wow, poor) ~ 3))
   
 ```
 

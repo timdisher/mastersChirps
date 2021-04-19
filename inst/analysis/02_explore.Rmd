@@ -26,8 +26,9 @@ rank_names <- c(r1_rank = "Day 1",
                 r4_rank = "Day 4")
 
 # Add indicator for players that are cut
-score_dat <- score_dat %>%
-  mutate(cut = ifelse(is.na(pos), TRUE, FALSE))
+score_dat <- xfun::cache_rds({score_dat %>%
+  mutate(cut = ifelse(is.na(pos), TRUE, FALSE))},
+  file = "score_dat.rds", dir = cache_dir)
 
 tx_def <-  function() {theme_xaringan(text_font_size = 10,
                  title_font_size = 10)
