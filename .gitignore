@@ -11,7 +11,6 @@
 !/data/entry_picks_anon.rda
 !/data/leaderboard.rda
 !/data/p_rank.rda
-/inst/slides/*
 
 
 # Session Data files

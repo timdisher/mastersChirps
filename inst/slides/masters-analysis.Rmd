@@ -1,0 +1,339 @@
+---
+title: "Masters Pool Analysis"
+subtitle: "Wow we are bad"  
+author: 
+  - "Tim Disher"
+date: '`r Sys.Date()`'
+output:
+  xaringan::moon_reader:
+    css: ["xaringan-themer.css", "style.css", "ninjutsu"]
+    seal: false
+    self_contained: false
+    nature:
+      slideNumberFormat: "%current%"
+      highlightStyle: github
+      highlightLines: true
+      ratio: 16:9
+      countIncrementalSlides: true
+      beforeInit: "macros.js"
+      
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(
+  fig.width=9, fig.height=3.5, fig.retina=3, fig.showtext = TRUE,
+  out.width = "100%",
+  cache = FALSE,
+  echo = FALSE,
+  dev = "svg",
+  message = FALSE, 
+  warning = FALSE,
+  fig.show = TRUE,
+  hiline = TRUE,
+  text_font_size = "40px"
+)
+
+cache_dir <- here::here("inst","analysis","cache/")
+cache_files <- list.files(cache_dir)
+
+tx_def <-  function() {theme_xaringan(text_font_size = 10,
+                 title_font_size = 10)
+}
+
+es_key <- structure(list(Name = c("Ryan (220)", "Chris (159)", "Tim (106)", 
+"Jason (121)", "Imran (163)"), alt_name = c("Eastin, John", 
+"Morlock, Geya", "Williams, Cameron", "Ross, Macie", "el-Afzal, Haazima"
+)), row.names = c(NA, -5L), class = c("tbl_df", "tbl", "data.frame"
+))
+
+plot_cols <- c("#002F6C", "#ED8B00", "#DC4405", "#007398", "#7FA9AE", "#B1B3B3", 
+"#565a5c")
+
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+library(tidyverse)
+library(gghighlight)
+style_mono_light(
+  base_color = "#002F6C",
+  title_slide_text_color = "white",
+  link_color = "#ED8B00",
+  text_bold_color = "#ED8B00"
+)
+
+# class: title-slide, bottom, left
+# background-image: url(images/img-baby-in-nicu1.jpg)
+# background-size: cover
+# 
+# .pull-left[
+# ## 2021 ~~Masters~~ Amateurs Pool
+# 
+# Tim Disher, PhD, RN]
+```
+
+class: title-slide, bottom, center
+background-image: url(images/masters-logo.png)
+background-size: cover
+
+
+### 2021 Masters Pool EVERSANA Performance
+#### Room for Improvement
+
+---
+# Executive Summary
+.pull-left[
+```{r, out.width=500}
+knitr::include_graphics("https://media.tenor.com/images/178ec783de0a8c61a6c37202cf6ff589/tenor.gif")
+```
+]
+
+.pull-right[
+####EVERSANA Final Leaderboard Position (out of 272) 
+![:scale 15%](images_private/tim-alt.png)Tim  -  **106**  
+![:scale 15%](images_private/jason.png)Jason  -  **121**  
+![:scale 15%](images_private/chris.png)Chris -  **159**  
+![:scale 15%](images_private/imran.png)Imran -  **163**  
+![:scale 15%](images_private/ryan.png)Ryan -  **220**  
+
+
+
+]
+
+---
+
+# Background
+
+.pull-left[
+#### The Tournament
+- The Masters is a golf tournament that takes place over four days. The winner gets
+a green jacket (pictured right)
+
+#### The Pool
+- A fundraiser for [three brothers](https://www.cbc.ca/news/canada/nova-scotia/sydney-project-honours-brother-1.5801362#:~:text=A%20Sydney%20family%20is%20turning,about%20their%20feelings%20and%20emotions.), a Sydney charity to raise awareness for men's mental health.
+- Each participant chose 8 golfers from three groups:
+  - Group A - 3 golfers (favourites)
+  - Group B - 3 golfers (mix)
+  - Group C - 2 golfers (mostly bad)  
+  
+  ]  
+
+.pull-right[
+```{r out.width=400, echo = FALSE, fig.cap = "Pictured: This year's winner Hideki Matsuyama"}
+knitr::include_graphics("images/winner.jpg")
+```
+]
+
+---
+# Methods
+
+### Golfer Performance
+- Simple visual exploration
+
+### Pool Participant Performance
+
+### .small[Golfer Selection]
+- Principal Components Analysis followed by k-means clustering to identify
+golfers commonly selected together
+
+### .small[Performance]
+- Participant profiles generated based on longitudinal performance. 
+- Latent class analysis using growth mixture models
+
+---
+# Golfer Performance
+
+Maybe watching golf isn't that boring? Leaderboard is dynamic over four days
+
+```{r}
+
+
+player_pdat <- readRDS(here::here("inst","analysis","cache",cache_files[grepl("score_pdat", cache_files)]))
+
+
+base_p <- player_pdat %>%
+  ggplot(aes(x = name, y = value, group = player)) +
+  labs(x = "", y = "Leaderboard Position") +
+  scale_y_reverse() + 
+  geom_line() + 
+  tx_def()
+ 
+base_p + 
+  gghighlight(min(value) <= 10) + 
+  labs(title = "Leaderboard over time - Ever in Top 10")
+  
+
+```
+
+---
+# Golfer Choice - No Clear Favourites?
+- PCA was not very effective for dimension reduction. Took until the 30th principal
+component for explain 80% of variance.
+- Kmeans scree plot pretty much a diagonal line. No clear elbow even looking at
+more than forty clusters. Silhouette method chose two clusters as optimal but
+not very informative
+  - Suggests no real pattern in actual choice of golfer?
+
+```{r fig.height=3}
+
+wide_dat <- readRDS(here::here("inst","analysis","cache",cache_files[grepl("wide_dat", cache_files)]))
+score_dat <- readRDS(here::here("inst","analysis","cache",cache_files[grepl("score_dat", cache_files)]))
+
+
+wide_dat %>% select(-alt_name) %>%
+  gather(key, val, - cluster) %>%
+  filter(val == 1) %>%
+  group_by(cluster,key) %>%
+  summarise(count = n()) %>%
+  group_by(cluster) %>%
+  mutate(perc = (count / sum(count) * 100)) %>%
+  left_join(score_dat %>% select(player, r4_rank), by = c("key" = "player")) %>%
+  ungroup() %>%
+  mutate(cluster = factor(cluster,levels = c(1, 2), labels = c("Cluster One", "Cluster Two"))) %>%
+  arrange(r4_rank) %>%
+  mutate(key = forcats::as_factor(key)) %>%
+  ggplot(aes(x = key, y = perc)) +
+  geom_col(stat = "identity") +
+  facet_wrap(~ cluster) +
+  labs(y = "Percent of times golfer selected",
+       x = "",
+       title = "Did anyone actually know what they were doing?",
+       subtitle = "x axis ordered from best to worst golfer performance")+ 
+  tx_def() +
+  theme(axis.text.x = element_blank())
+
+
+```
+
+
+---
+# EVERSANA Selections Generally Poor
+
+EVERSANA staff never threatened to win and all finished outside the top 100
+
+```{r}
+gp_dat <- readRDS(here::here("inst","analysis","cache",cache_files[grepl("gp_dat", cache_files)]))
+class_data <- readRDS(here::here("inst","analysis","cache",cache_files[grepl("class_data", cache_files)]))
+
+pos = position_jitterdodge(jitter.width = 100, jitter.height = 10, seed=1)
+
+
+
+gp_dat %>%
+  left_join(es_key) %>%
+  mutate(alt_name = case_when(is.na(Name) ~ alt_name,
+                              TRUE ~ Name))%>%
+  ggplot(aes(x = key, y = pos, group = alt_name)) +
+  geom_line(size = 0.3) +
+  gghighlight(alt_name %in% es_key$Name, label_params = list(size = 2,
+                                                                 color = plot_cols[[1]])) +
+ scale_y_reverse() +
+  labs(x = "",
+       y = "Leaderboard Position") +
+  tx_def()
+
+
+
+```
+
+---
+
+# Pool Performance Described by Four Profiles
+
+Participants in the masters pool showed large variability in scores between days,
+but grouped into those that were **strong performers** the entire time, those that
+**improved** over time, those that **declined**, and **poor performers**
+```{r}
+gp_dat %>%
+  ggplot(aes(x = key, y = pos, group = alt_name, colour = factor(class))) +
+  geom_line(alpha = 0.2, size = 0.3) +
+  scale_y_reverse() +
+  geom_line(data = class_data, inherit.aes = FALSE,
+            size = 1,
+            aes(x = day, y = `50`,group = class, colour = factor(class))) +
+  scale_color_manual(values = plot_cols[1:4], name = "Profile",
+                     breaks = c(3, 1, 4, 2),
+                     labels = c("Strong Performers",
+                                "Improvers", 
+                                "Decliners",
+                                "Poor Performers"
+                                )) +
+  labs(y = "Player Position",
+       x = "") +
+  tx_def()
+  
+```
+
+
+---
+class: split-four
+
+
+.column[
+.center[
+![:scale 60%](images_private/strong-prof.png)]
+
+### Strong Performers  
+
+
+- Performed well on all four days
+- Pre-Masters PGA Ranks
+  - Mean: 24
+  - No. unranked: 0.1,
+  - No. ranked > 100: 0.8
+- Not an employee of EVERSANA
+]  
+
+
+.column[.center[
+
+![:scale 60%](images_private/jason.png)
+### Improvers]
+- Start middle of the pack and improve or stay similar
+- Pre-Masters PGA Ranks
+  - Mean: 30
+  - No. unranked: 0.4,
+  - No. ranked > 100: 2
+- Typical example: 
+  - **Jason (162 -> 121)**
+  - **Tim (103 -> 106)**
+]
+
+.column[.center[
+
+![:scale 60%](images_private/chris.png)
+### Decliners]
+- Start middle of the pack and decline over time
+- Pre-Masters PGA Ranks
+  - Mean: 27
+  - No. unranked: 0.2,
+  - No. ranked > 100: 1.5
+- Typical example:
+  - **Chris (101 -> 159)**
+  - **Ryan (166 -> 220)**
+  - **Imran (146 -> 163)**
+]  
+
+
+.column[
+
+.center[![:scale 60%](images_private/mikeweir.png)]
+### Poor Performers
+- Performed poorly on all four days
+- Pre-Masters PGA Ranks
+  - Mean: 35.7
+  - No. unranked: 1.1,
+  - No. ranked > 100: 4
+- Not an employee of EVERSANA 
+]
+
+---
+class: inverse,middle,center
+# Thank You
+
+---
+class: inverse,middle,center
+# Questions?

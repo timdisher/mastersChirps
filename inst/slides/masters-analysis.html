@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Masters Pool Analysis</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Tim Disher" />
+    <meta name="date" content="2021-04-19" />
+    <link href="masters-analysis_files/remark-css/ninjutsu.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+    <link rel="stylesheet" href="style.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+
+
+
+class: title-slide, bottom, center
+background-image: url(images/masters-logo.png)
+background-size: cover
+
+
+### 2021 Masters Pool EVERSANA Performance
+#### Room for Improvement
+
+---
+# Executive Summary
+.pull-left[
+&lt;img src="https://media.tenor.com/images/178ec783de0a8c61a6c37202cf6ff589/tenor.gif" width="500" /&gt;
+]
+
+.pull-right[
+####EVERSANA Final Leaderboard Position (out of 272) 
+![:scale 15%](images_private/tim-alt.png)Tim  -  **106**  
+![:scale 15%](images_private/jason.png)Jason  -  **121**  
+![:scale 15%](images_private/chris.png)Chris -  **159**  
+![:scale 15%](images_private/imran.png)Imran -  **163**  
+![:scale 15%](images_private/ryan.png)Ryan -  **220**  
+
+
+
+]
+
+---
+
+# Background
+
+.pull-left[
+#### The Tournament
+- The Masters is a golf tournament that takes place over four days. The winner gets
+a green jacket (pictured right)
+
+#### The Pool
+- A fundraiser for [three brothers](https://www.cbc.ca/news/canada/nova-scotia/sydney-project-honours-brother-1.5801362#:~:text=A%20Sydney%20family%20is%20turning,about%20their%20feelings%20and%20emotions.), a Sydney charity to raise awareness for men's mental health.
+- Each participant chose 8 golfers from three groups:
+  - Group A - 3 golfers (favourites)
+  - Group B - 3 golfers (mix)
+  - Group C - 2 golfers (mostly bad)  
+  
+  ]  
+
+.pull-right[
+&lt;div class="figure"&gt;
+&lt;img src="images/winner.jpg" alt="Pictured: This year's winner Hideki Matsuyama" width="400" /&gt;
+&lt;p class="caption"&gt;Pictured: This year's winner Hideki Matsuyama&lt;/p&gt;
+&lt;/div&gt;
+]
+
+---
+# Methods
+
+### Golfer Performance
+- Simple visual exploration
+
+### Pool Participant Performance
+
+### .small[Golfer Selection]
+- Principal Components Analysis followed by k-means clustering to identify
+golfers commonly selected together
+
+### .small[Performance]
+- Participant profiles generated based on longitudinal performance. 
+- Latent class analysis using growth mixture models
+
+---
+# Golfer Performance
+
+Maybe watching golf isn't that boring? Leaderboard is dynamic over four days
+
+&lt;img src="masters-analysis_files/figure-html/unnamed-chunk-3-1.svg" width="100%" /&gt;
+
+---
+# Golfer Choice - No Clear Favourites?
+- PCA was not very effective for dimension reduction. Took until the 30th principal
+component for explain 80% of variance.
+- Kmeans scree plot pretty much a diagonal line. No clear elbow even looking at
+more than forty clusters. Silhouette method chose two clusters as optimal but
+not very informative
+  - Suggests no real pattern in actual choice of golfer?
+
+&lt;img src="masters-analysis_files/figure-html/unnamed-chunk-4-1.svg" width="100%" /&gt;
+
+
+---
+# EVERSANA Selections Generally Poor
+
+EVERSANA staff never threatened to win and all finished outside the top 100
+
+&lt;img src="masters-analysis_files/figure-html/unnamed-chunk-5-1.svg" width="100%" /&gt;
+
+---
+
+# Pool Performance Described by Four Profiles
+
+Participants in the masters pool showed large variability in scores between days,
+but grouped into those that were **strong performers** the entire time, those that
+**improved** over time, those that **declined**, and **poor performers**
+&lt;img src="masters-analysis_files/figure-html/unnamed-chunk-6-1.svg" width="100%" /&gt;
+
+
+---
+class: split-four
+
+
+.column[
+.center[
+![:scale 60%](images_private/strong-prof.png)]
+
+### Strong Performers  
+
+
+- Performed well on all four days
+- Pre-Masters PGA Ranks
+  - Mean: 24
+  - No. unranked: 0.1,
+  - No. ranked &gt; 100: 0.8
+- Not an employee of EVERSANA
+]  
+
+
+.column[.center[
+
+![:scale 60%](images_private/jason.png)
+### Improvers]
+- Start middle of the pack and improve or stay similar
+- Pre-Masters PGA Ranks
+  - Mean: 30
+  - No. unranked: 0.4,
+  - No. ranked &gt; 100: 2
+- Typical example: 
+  - **Jason (162 -&gt; 121)**
+  - **Tim (103 -&gt; 106)**
+]
+
+.column[.center[
+
+![:scale 60%](images_private/chris.png)
+### Decliners]
+- Start middle of the pack and decline over time
+- Pre-Masters PGA Ranks
+  - Mean: 27
+  - No. unranked: 0.2,
+  - No. ranked &gt; 100: 1.5
+- Typical example:
+  - **Chris (101 -&gt; 159)**
+  - **Ryan (166 -&gt; 220)**
+  - **Imran (146 -&gt; 163)**
+]  
+
+
+.column[
+
+.center[![:scale 60%](images_private/mikeweir.png)]
+### Poor Performers
+- Performed well on all four days
+- Pre-Masters PGA Ranks
+  - Mean: 35.7
+  - No. unranked: 1.1,
+  - No. ranked &gt; 100: 4
+- Not an employee of EVERSANA 
+]
+
+---
+class: inverse,middle,center
+# Thank You
+
+---
+class: inverse,middle,center
+# Questions?
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="macros.js"></script>
+<script>var slideshow = remark.create({
+"slideNumberFormat": "%current%",
+"highlightStyle": "github",
+"highlightLines": true,
+"ratio": "16:9",
+"countIncrementalSlides": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
